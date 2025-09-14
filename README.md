@@ -11,7 +11,7 @@ Refer to Helm's [documentation](https://helm.sh/docs/) to get started.
 ## Installation
 
 ```sh
-helm repo add darkhonor http://darkhonor.github.io/helm-charts/
+helm repo add darkhonor https://darkhonor.github.io/helm-charts/
 ```
 
 You can then run `helm search repo darkhonor` to search the charts.
