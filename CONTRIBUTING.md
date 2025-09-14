@@ -2,8 +2,6 @@
 
 Thanks for contributing to this repository!
 
-If you are coming from `web.git.mil` and have a DoD account please keep reading. 
-
 This repository follows the following conventions:
 
 * [Semantic Versioning](https://semver.org/)
