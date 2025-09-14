@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "drawio.fullname" . }}-test-connection"
+  labels:
+    {{- include "drawio.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "drawio.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
