@@ -14,9 +14,7 @@ metadata:
     {{- tpl (toYaml .Values.gateway.annotations | nindent 4) . }}
   {{- end }}
 spec:
-  {{- with .Values.gateway.class }}
-  gatewayClassName: {{  }}
-  {{- end }}
+  gatewayClassName: {{ .Values.gateway.class }}
   listeners:
     - name: https
       protocol: {{ .Values.gateway.listener.protocol | default "HTTPS" }}
@@ -24,7 +22,7 @@ spec:
       hostname: {{ .Values.gateway.host }}
       {{- if .Values.gateway.tls.enabled }}
       tls:
-        mode: {{ .Values.gateway.tls.mode | default Terminate | quote }}
+        mode: {{ .Values.gateway.tls.mode | default "Terminate" | quote }}
         {{- if eq .Values.gateway.tls.mode "Terminate" }}
         certificateRefs:
           - name: {{ include "open-webui.name" . }}-tls
