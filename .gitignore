@@ -93,3 +93,6 @@ crash.log
 
 # Sensitive Info
 sensitive.txt
+
+# Demo Values files for testing
+demo/
