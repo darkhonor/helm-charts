@@ -27,7 +27,7 @@ jobs:
         run: |
           helm repo add open-webui https://helm.openwebui.com/
           helm repo add tika https://apache.jfrog.io/artifactory/tika
-          helm repo add otwld https://helm.otwld.com/
+          helm repo add otwld https://otwld.github.io/ollama-helm/
           helm repo update
 
       - name: Run chart-releaser
