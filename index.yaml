@@ -1,0 +1,58 @@
+apiVersion: v1
+entries:
+  drawio:
+  - apiVersion: v2
+    appVersion: 28.2.0
+    created: "2025-09-16T14:56:58.874631608Z"
+    description: A Helm chart for draw.io
+    digest: 1df9bd8c4dd8314368ba4ac67fccc380e4cca078a06c8b151baddd535143af6c
+    name: drawio
+    type: application
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/drawio-1.0.0/drawio-1.0.0.tgz
+    version: 1.0.0
+  open-webui:
+  - annotations:
+      licenses: MIT
+    apiVersion: v2
+    appVersion: 0.6.28
+    created: "2025-09-16T14:56:59.102523549Z"
+    dependencies:
+    - condition: ollama.enabled
+      import-values:
+      - child: service
+        parent: ollama.service
+      name: ollama
+      repository: https://otwld.github.io/ollama-helm/
+      version: '>=0.24.0'
+    - condition: pipelines.enabled
+      import-values:
+      - child: service
+        parent: pipelines.service
+      name: pipelines
+      repository: https://helm.openwebui.com
+      version: '>=0.0.1'
+    - condition: tika.enabled
+      name: tika
+      repository: https://apache.jfrog.io/artifactory/tika
+      version: '>=2.9.0'
+    description: "Open WebUI: A User-Friendly Web Interface for Chat Interactions
+      \U0001F44B"
+    digest: 06a98d795535b4885911637fd55c7768173b62711a5e5a2291566120225f1a1e
+    home: https://www.openwebui.com/
+    icon: https://raw.githubusercontent.com/open-webui/open-webui/main/static/favicon.png
+    keywords:
+    - llm
+    - chat
+    - web-ui
+    - open-webui
+    name: open-webui
+    sources:
+    - https://github.com/open-webui/helm-charts
+    - https://github.com/open-webui/open-webui/pkgs/container/open-webui
+    - https://github.com/otwld/ollama-helm/
+    - https://hub.docker.com/r/ollama/ollama
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/open-webui-8.4.0/open-webui-8.4.0.tgz
+    version: 8.4.0
+generated: "2025-09-16T14:56:59.102539018Z"
