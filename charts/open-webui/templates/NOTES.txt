@@ -58,7 +58,8 @@ This interface allows you to easily interact with local AI models.
   Ingress is enabled. Access the application at: http{{ if .Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.host }}
 {{- end }}
 
-{{- If .Values.gateway.enabled }}
+{{- if .Values.gateway.enabled }}
+
   Gateway API is enabled. Access the application at http{{ if .Values.gateway.tls.enabled }}s{{ end }}://{{ .Values.gateway.host }}
 {{- end }}
 
