@@ -8,7 +8,7 @@ spec:
   secretName: {{ include "open-webui.name" . }}-tls
   privateKey:
     rotationPolicy: Always  # Default for cert-manager > v1.18.0
-    algorithm: {{- .Values.gateway.tls.certificate.algorithm | default RSA | quote }}
+    algorithm: {{- .Values.gateway.tls.certificate.algorithm | default "RSA" | quote }}
     size: {{- .Values.gateway.tls.certificate.keySize | default 4096 }}
   duration: {{- .Values.gateway.tls.certificate.duration | default 2160h }}
   renewBefore: {{- .Values.gateway.tls.certificate.renewBefore | default 360h }}
@@ -17,7 +17,7 @@ spec:
     - server auth
   subject:
     organizations:
-      - {{- .Values.gateway.tls.certificate.organization | default Production | quote }}
+      - {{- .Values.gateway.tls.certificate.organization | default "Production" | quote }}
   commonName: {{ .Values.gateway.host }}
   dnsNames:
     - {{ .Values.gateway.host }}
