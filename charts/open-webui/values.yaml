@@ -2,7 +2,7 @@ nameOverride: ""
 namespaceOverride: ""
 ollama:
   # -- Automatically install Ollama Helm chart from https://otwld.github.io/ollama-helm/. Use [Helm Values](https://github.com/otwld/ollama-helm/#helm-values) to configure
-  enabled: true
+  enabled: false
   # -- If enabling embedded Ollama, update fullnameOverride to your desired Ollama name value, or else it will use the default ollama.name value from the Ollama chart
   fullnameOverride: "open-webui-ollama"
   # -- Example Ollama configuration with nvidia GPU enabled, automatically downloading a model, and deploying a PVC for model persistence
@@ -147,34 +147,31 @@ imagePullSecrets: []
 
 # -- Probe for liveness of the Open WebUI container
 # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes>
-livenessProbe: {}
-# livenessProbe:
-#   httpGet:
-#     path: /health
-#     port: http
-#   failureThreshold: 1
-#   periodSeconds: 10
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  failureThreshold: 1
+  periodSeconds: 10
 
 # -- Probe for readiness of the Open WebUI container
 # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes>
-readinessProbe: {}
-# readinessProbe:
-#   httpGet:
-#     path: /health/db
-#     port: http
-#   failureThreshold: 1
-#   periodSeconds: 10
+readinessProbe:
+  httpGet:
+    path: /health/db
+    port: http
+  failureThreshold: 1
+  periodSeconds: 10
 
 # -- Probe for startup of the Open WebUI container
 # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes>
-startupProbe: {}
-# startupProbe:
-#   httpGet:
-#     path: /health
-#     port: http
-#   initialDelaySeconds: 30
-#   periodSeconds: 5
-#   failureThreshold: 20
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  failureThreshold: 20
 
 resources: {}
 
@@ -192,6 +189,7 @@ managedCertificate:
   domains:
     - chat.example.com # update to your real domain
 
+# -- Not Recommended for Use. Use Gateway API definition. Ref: https://gateway-api.sigs.k8s.io/
 ingress:
   enabled: false
   class: ""
@@ -211,6 +209,35 @@ ingress:
   tls: false
   existingSecret: ""
 
+  # -- Additional custom labels to add to the Ingress metadata
+  # Useful for tagging, selecting, or applying policies to the Ingress via labels.
+  extraLabels: {}
+  # extraLabels:
+  #   app.kubernetes.io/environment: "staging"
+
+gateway:
+  enabled: true
+  class: "traefik"         # Add your Gateway API Provider Class (Traefik, Istio, Kong, etc.)
+  # -- Use appropriate annotations for your Gateway controller
+  annotations: {}
+  listener: 
+    protocol: HTTPS        # Valid values: HTTP or HTTPS
+    port: 443
+  host: "chat.example.com" # update to your real domain
+  additionalHosts: []
+  tls:
+    enabled: true
+    mode: Terminate   # Valid Values: Terminate or Passthrough
+    certificate:
+      generate: true
+      algorithm: RSA
+      keySize: 4096   # Recommended values are > 2048; NSA Guideline is > 3072 for RSA keys
+      duration: 2160h   # Value in Hours that the certificate is good for; chart default is 90 days
+      renewBefore: 360h # Value in Hours when the certificate should be renewed before expiration; chart default is 15 days
+      organization: ""
+    issuer: "" 
+    issuerKind: ClusterIssuer   # Value Values: ClusterIssuer or Issuer
+  existingSecret: ""
   # -- Additional custom labels to add to the Ingress metadata
   # Useful for tagging, selecting, or applying policies to the Ingress via labels.
   extraLabels: {}
@@ -398,27 +425,25 @@ volumes: []
 # -- Configure pod security context
 # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container>
 podSecurityContext:
-  {}
-  # fsGroupChangePolicy: Always
-  # sysctls: []
-  # supplementalGroups: []
-  # fsGroup: 1001
+  fsGroupChangePolicy: Always
+  sysctls: []
+  supplementalGroups: []
+  fsGroup: 1001
 
 # -- Configure container security context
 # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-containe>
 containerSecurityContext:
-  {}
-  # runAsUser: 1001
-  # runAsGroup: 1001
-  # runAsNonRoot: true
-  # privileged: false
-  # allowPrivilegeEscalation: false
-  # readOnlyRootFilesystem: false
-  # capabilities:
-  #   drop:
-  #     - ALL
-  # seccompProfile:
-  #   type: "RuntimeDefault"
+  runAsUser: 1001
+  runAsGroup: 1001
+  runAsNonRoot: true
+  privileged: false
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: "RuntimeDefault"
 
 sso:
   # -- **Enable SSO authentication globally** must enable to use SSO authentication

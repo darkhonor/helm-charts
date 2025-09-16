@@ -13,6 +13,17 @@ Open WebUI: A User-Friendly Web Interface for Chat Interactions 👋
 * <https://github.com/otwld/ollama-helm/>
 * <https://hub.docker.com/r/ollama/ollama>
 
+## Darkhonor Modifications
+
+Here are the modifications to this Helm Chart from the upstream chart:
+
+* DoD STIG Pod SecurityContext and Container SecurityContext configurations
+* Ollama disabled by default
+* Liveness, Readiness, and Startup Probes enabled by default
+* Added Note to Ingress definition recommending not using in lieu of Gateway API
+* Added [Gateway API](https://gateway-api.sigs.k8s.io/) Gateway and HTTPRoute definitions and enabled by default
+* Added TLS Certificate generation for Gateway API with [cert-manager](https://cert-manager.io)
+
 ## Installing
 
 Before you can install, you need to add the `open-webui` repo to [Helm](https://helm.sh)

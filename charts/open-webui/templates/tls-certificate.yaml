@@ -1,0 +1,27 @@
+{{- if .Values.gateway.tls.certificate.generate }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "open-webui.name" . }}
+  namespace: {{ include "open-webui.namespace" . }}
+spec:
+  secretName: {{ include "open-webui.name" . }}-tls
+  privateKey:
+    rotationPolicy: Always  # Default for cert-manager > v1.18.0
+    algorithm: {{- .Values.gateway.tls.certificate.algorithm | default RSA }}
+    size: {{- .Values.gateway.tls.certificate.keySize | default 4096 }}
+  duration: {{- .Values.gateway.tls.certificate.duration | default 2160h }}
+  renewBefore: {{- .Values.gateway.tls.certificate.renewBefore | default 360h }}
+  isCA: false
+  usages:
+    - server auth
+  subject:
+    organizations:
+      - {{- .Values.gateway.tls.certificate.organization | default Production }}
+  commonName: {{ .Values.gateway.host }}
+  dnsNames:
+    - {{ .Values.gateway.host }}
+  issuerRef:
+    name: {{- .Values.gateway.tls.issuer }}
+    kind: {{- .Values.gateway.tls.issuerKind }}
+{{- end }}
