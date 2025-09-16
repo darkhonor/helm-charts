@@ -7,7 +7,7 @@ metadata:
 spec:
   secretName: {{ include "open-webui.name" . }}-tls
   privateKey:
-    rotationPolicy: Always  # Default for cert-manager > v1.18.0
+    rotationPolicy: "Always"  # Default for cert-manager > v1.18.0
     algorithm: {{- .Values.gateway.tls.certificate.algorithm | default "RSA" | quote }}
     size: {{- .Values.gateway.tls.certificate.keySize | default 4096 }}
   duration: {{- .Values.gateway.tls.certificate.duration | default "2160h" | quote }}
