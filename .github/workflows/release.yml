@@ -23,7 +23,15 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - name: Add Repos
+        run: |
+          helm repo add open-webui https://helm.openwebui.com/
+          helm repo add tika https://apache.jfrog.io/artifactory/tika
+          helm repo add otwld https://helm.otwld.com/
+          helm repo update
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_SKIP_EXISTING: true
