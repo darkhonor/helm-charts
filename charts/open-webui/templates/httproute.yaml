@@ -24,7 +24,8 @@ spec:
         - path:
             type: PathPrefix
             value: /
-        backendRefs:
-          - name: {{ include "open-webui.name" . }}
-            port: {{ .Values.service.port }}
+      backendRefs:
+        - name: {{ include "open-webui.name" . }}
+          namespace: {{ include "open-webui.namespace" . }}
+          port: {{ .Values.service.port }}
 {{- end }}
