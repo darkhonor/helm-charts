@@ -1,6 +1,6 @@
 # open-webui
 
-![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square) ![AppVersion: 0.6.28](https://img.shields.io/badge/AppVersion-0.6.28-informational?style=flat-square)
+![Version: 1.0.6](https://img.shields.io/badge/Version-1.0.-informational?style=flat-square) ![AppVersion: 0.6.28](https://img.shields.io/badge/AppVersion-0.6.28-informational?style=flat-square)
 
 Open WebUI: A User-Friendly Web Interface for Chat Interactions 👋
 
@@ -8,6 +8,7 @@ Open WebUI: A User-Friendly Web Interface for Chat Interactions 👋
 
 ## Source Code
 
+* <https://github.com/darkhonor/helm-charts>
 * <https://github.com/open-webui/helm-charts>
 * <https://github.com/open-webui/open-webui/pkgs/container/open-webui>
 * <https://github.com/otwld/ollama-helm/>
@@ -26,17 +27,17 @@ Here are the modifications to this Helm Chart from the upstream chart:
 
 ## Installing
 
-Before you can install, you need to add the `open-webui` repo to [Helm](https://helm.sh)
+Before you can install, you need to add the `darkhonor` repo to [Helm](https://helm.sh)
 
 ```shell
-helm repo add open-webui https://helm.openwebui.com/
+helm repo add darkhonor https://darkhonor.github.io/helm-charts
 helm repo update
 ```
 
 Now you can install the chart:
 
 ```shell
-helm upgrade --install open-webui open-webui/open-webui
+helm upgrade --install open-webui darkhonor/open-webui
 ```
 
 ## Requirements
