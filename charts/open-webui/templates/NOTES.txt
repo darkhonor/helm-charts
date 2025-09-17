@@ -12,7 +12,7 @@ v{{ .Chart.AppVersion }} - building the best open-source AI user interface.
  - Project URL 1: {{ .Chart.Home }}
  - Project URL 2: https://github.com/open-webui/open-webui
  - Documentation: https://docs.openwebui.com/
- - Chart URL: https://github.com/open-webui/helm-charts
+ - Chart URL: https://github.com/darkhonor/helm-charts (upstream: https://github.com/open-webui/helm-charts)
 
 Open WebUI is a web-based user interface that works with Ollama, OpenAI, Claude 3, Gemini and more.
 This interface allows you to easily interact with local AI models.
