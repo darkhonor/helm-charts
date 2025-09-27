@@ -437,6 +437,11 @@ databaseUrl: ""
 
 # -- Env vars added to the Open WebUI deployment. Most up-to-date environment variables can be found here: https://docs.openwebui.com/getting-started/env-configuration/
 extraEnvVars:
+  - name: WEBUI_SECRET_KEY
+    valueFrom:
+      secretKeyRef:
+        name: webui-secret-key
+        key: password
   # -- Default API key value for Pipelines. Should be updated in a production deployment, or be changed to the required API key if not using Pipelines
   - name: OPENAI_API_KEY
     value: "0p3n-w3bu!"
@@ -696,3 +701,41 @@ logging:
     # -- Set the log level for the Authentication Webhook component
     # @section -- Logging configuration
     webhook: ""
+
+vault-secrets:
+  enabled: true
+  authRef: "vault/default"
+  webui-admin:
+    mountPoint: "kv-v2"
+    path: "openai-api"
+    secretName: "openai-api-key"
+  openai-api:
+    mountPoint: "kv-v2"
+    path: "webui-admin"
+    secretName: "webui-secret-key"
+  google:
+    mountPoint: "kv-v2"
+    path: "webui-google"
+    secretName: "webui-google-secret"
+  microsoft:
+    mountPoint: "kv-v2"
+    path: "webui-microsoft"
+    secretName: "webui-microsoft-secret"
+  github:
+    mountPoint: "kv-v2"
+    path: "webui-github"
+    secretName: "webui-github-secret"
+  oidc:
+    mountPoint: "kv-v2"
+    path: "webui-oidc"
+    secretName: "webui-oidc-secret"
+  s3:
+    mountPoint: "kv-v2"
+    path: "webui-s3"
+    # Secret Name is pulled from S3 settings above (assume access-key and secret-key in same secret)
+  gcs:
+    mountPoint: "kv-v2"
+    path: "webui-gcs"
+  azure:
+    mountPoint: "kv-v2"
+    path: "webui-azure"
