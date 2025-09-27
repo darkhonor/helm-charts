@@ -109,69 +109,78 @@ websocket:
   # -- Specifies the websocket manager to use with env `WEBSOCKET_MANAGER`: redis (default)
   manager: redis
   # -- Specifies the URL of the Redis instance for websocket communication. Template with `redis://[:<password>@]<hostname>:<port>/<db>`
-  url: redis://open-webui-redis:6379/0
+  url: redis://open-webui-valkey:6379/0
   # -- Node selector for websocket pods
   nodeSelector: {}
-  # -- Deploys a redis
-  redis:
-    # -- Enable redis installation
+  # -- Deploys a Valkey
+  valkey:
+    # -- Enable Valkey installation
     enabled: true
-    # -- Redis name
-    name: open-webui-redis
-    # -- Redis labels
+    # -- Valkey name
+    name: open-webui-valkey
+    # -- Valkey labels
     labels: {}
-    # -- Redis annotations
+    # -- Valkey annotations
     annotations: {}
-    # -- Redis pod
+    # -- Valkey pod
     pods:
-      # -- Redis pod labels
+      # -- Valkey pod labels
       labels: {}
-      # -- Redis pod annotations
+      # -- Valkey pod annotations
       annotations: {}
-    # -- Redis image
+    # -- Valkey image
     image:
-      repository: redis
-      tag: 7.4.2-alpine3.21
+      repository: ghcr.io/valkey-io/valkey
+      tag: 8.1.3-bookworm
       pullPolicy: IfNotPresent
-    # -- Redis command (overrides default)
+    # -- Valkey command (overrides default)
     command: []
-    # -- Redis arguments (overrides default)
+    # -- Valkey arguments (overrides default)
     args: []
-    # -- Redis resources
+    # -- Valkey resources
     resources: {}
-    # -- Redis service
+    # -- Valkey service
     service:
-      # -- Redis container/target port
+      # -- Valkey container/target port
       containerPort: 6379
-      # -- Redis service type
+      # -- Valkey service type
       type: ClusterIP
-      # -- Redis service labels
+      # -- Valkey service labels
       labels: {}
-      # -- Redis service annotations
+      # -- Valkey service annotations
       annotations: {}
-      # -- Redis service port name. Istio needs this to be something like `tcp-redis`
+      # -- Valkey service port name. Istio needs this to be something like `tcp-valkey`
       portName: http
-      # -- Redis service port
+      # -- Valkey service port
       port: 6379
-      # -- Redis service node port. Valid only when type is `NodePort`
+      # -- Valkey service node port. Valid only when type is `NodePort`
       nodePort: ""
-    # -- Redis tolerations for pod assignment
+    # -- Valkey tolerations for pod assignment
     tolerations: []
 
-    # -- Redis affinity for pod assignment
+    # -- Valkey affinity for pod assignment
     affinity: {}
 
-    # -- Redis container security context (certain specs are not allowed on a pod level), if readOnlyRootFilesystem is true, an emtpyDir will be mounted on the redis container
+    # -- Valkey container security context (certain specs are not allowed on a pod level), if readOnlyRootFilesystem is true, an emtpyDir will be mounted on the valkey container
     containerSecurityContext:
-      {}
-      # readOnlyRootFilesystem: true
-      # runAsNonRoot: true
+      runAsNonRoot: true
+      privileged: false
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: "RuntimeDefault"
 
-    # -- Redis pod security context
+    # -- Valkey pod security context
     podSecurityContext:
-      {}
-      # runAsUser: 999
-      # runAsGroup: 1000
+      fsGroupChangePolicy: Always
+      sysctls: []
+      supplementalGroups: []
+      runAsUser: 999
+      runAsGroup: 1000
+      fsGroup: 1000
 
 # -- Value of cluster domain
 clusterDomain: cluster.local
