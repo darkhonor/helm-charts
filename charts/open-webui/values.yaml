@@ -22,11 +22,11 @@ ollama:
   #   volumeName: "example-pre-existing-pv-created-by-smb-csi"
   # -- Configure pod security context
   # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container>
-  podSecurityContext:
-    fsGroupChangePolicy: Always
-    sysctls: []
-    supplementalGroups: []
-    fsGroup: 1001
+  # podSecurityContext:
+  #   fsGroupChangePolicy: Always
+  #   sysctls: []
+  #   supplementalGroups: []
+  #   fsGroup: 1001
 
   # -- Configure container security context
   # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-containe>
@@ -50,11 +50,11 @@ pipelines:
   extraEnvVars: []
   # -- Configure pod security context
   # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container>
-  podSecurityContext:
-    fsGroupChangePolicy: Always
-    sysctls: []
-    supplementalGroups: []
-    fsGroup: 1001
+  # podSecurityContext:
+  #   fsGroupChangePolicy: Always
+  #   sysctls: []
+  #   supplementalGroups: []
+  #   fsGroup: 1001
 
   # -- Configure container security context
   # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-containe>
@@ -76,11 +76,11 @@ tika:
   enabled: false
   # -- Configure pod security context
   # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container>
-  podSecurityContext:
-    fsGroupChangePolicy: Always
-    sysctls: []
-    supplementalGroups: []
-    fsGroup: 1001
+  # podSecurityContext:
+  #   fsGroupChangePolicy: Always
+  #   sysctls: []
+  #   supplementalGroups: []
+  #   fsGroup: 1001
 
   # -- Configure container security context
   # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-containe>
@@ -163,6 +163,8 @@ websocket:
 
     # -- Valkey container security context (certain specs are not allowed on a pod level), if readOnlyRootFilesystem is true, an emtpyDir will be mounted on the valkey container
     containerSecurityContext:
+      runAsUser: 999
+      runAsGroup: 1000
       runAsNonRoot: true
       privileged: false
       allowPrivilegeEscalation: false
@@ -174,13 +176,11 @@ websocket:
         type: "RuntimeDefault"
 
     # -- Valkey pod security context
-    podSecurityContext:
-      fsGroupChangePolicy: Always
-      sysctls: []
-      supplementalGroups: []
-      runAsUser: 999
-      runAsGroup: 1000
-      fsGroup: 1000
+    # podSecurityContext:
+    #   fsGroupChangePolicy: Always
+    #   sysctls: []
+    #   supplementalGroups: []
+    #   fsGroup: 1000
 
 # -- Value of cluster domain
 clusterDomain: cluster.local
@@ -504,11 +504,11 @@ volumes: []
 
 # -- Configure pod security context
 # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container>
-podSecurityContext:
-  fsGroupChangePolicy: Always
-  sysctls: []
-  supplementalGroups: []
-  fsGroup: 1001
+# podSecurityContext:
+#   fsGroupChangePolicy: Always
+#   sysctls: []
+#   supplementalGroups: []
+#   fsGroup: 1001
 
 # -- Configure container security context
 # ref: <https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-containe>
@@ -702,14 +702,14 @@ logging:
     # @section -- Logging configuration
     webhook: ""
 
-vault-secrets:
+vaultSecrets:
   enabled: true
   authRef: "vault/default"
-  webui-admin:
+  webuiAdmin:
     mountPoint: "kv-v2"
     path: "openai-api"
     secretName: "openai-api-key"
-  openai-api:
+  openaiApi:
     mountPoint: "kv-v2"
     path: "webui-admin"
     secretName: "webui-secret-key"
