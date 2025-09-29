@@ -1,0 +1,12 @@
+{{- if .Values.config.settings.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "searxng.fullname" . }}-settings
+  namespace: {{ include "searxng.namespace" . }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+data:
+  settings.yml: |
+    {{- .Values.config.settings.data | nindent 4 }}
+{{- end }}

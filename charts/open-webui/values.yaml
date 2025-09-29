@@ -313,7 +313,7 @@ gateway:
     issuer: "" 
     issuerKind: ClusterIssuer   # Value Values: ClusterIssuer or Issuer
   existingSecret: ""
-  # -- Additional custom labels to add to the Ingress metadata
+  # -- Additional custom labels to add to the Gateway and HTTPRoute metadata
   # Useful for tagging, selecting, or applying policies to the Ingress via labels.
   extraLabels: {}
   # extraLabels:

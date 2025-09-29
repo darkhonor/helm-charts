@@ -1,0 +1,26 @@
+apiVersion: v2
+name: searxng
+description: SearXNG is a free internet metasearch engine
+home: https://docs.searxng.org
+type: application
+version: 0.1.0
+appVersion: "2025.9.29-77fd3ee53"
+keywords:
+- searxng
+- search
+- metasearch
+- kubernetes
+- privacy
+sources:
+  - https://github.com/darkhonor/helm-charts
+  - https://github.com/searxng/searxng
+annotations:
+  licenses: Apache-2.0
+maintainers:
+  - name: darkhonor
+    url: https://www.vmhomelab.org
+dependencies:
+  - name: valkey
+    repository: https://valkey.io/valkey-helm/
+    version: "0.7.2"
+    condition: valkey.enabled

@@ -1,0 +1,259 @@
+# Default values for searxng.
+namespaceOverride: ""
+
+# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+replicaCount: 1
+
+# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+image:
+  repository: ghcr.io/searxng/searxng
+  # This sets the pull policy for images.
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  create: true
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 977
+
+securityContext:
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsUser: 977
+  runAsGroup: 977
+  seccompProfile:
+    type: RuntimeDefault
+  capabilities:
+    drop:
+    - ALL
+
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  type: ClusterIP
+  port: 8080
+
+# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: search.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: search-tls
+  #    hosts:
+  #      - search.local
+
+# This block is for setting up the HTTPRoute using the Gateway API. More information can be found here: https://gateway-api.sigs.k8s.io/api-types/httproute/
+httproute:
+  enabled: true
+  annotations: {}
+    # gateway.networking.k8s.io/route-timeout: "30s"
+  gateway:
+    enabled: true
+    class: "istio"
+    listener:
+      protocol: "HTTPS"
+      port: 443
+  hostname: "search.local"
+  # If you enable this, you must have cert-manager already installed and an Issuer or ClusterIssuer created
+  tls:
+    enabled: true
+    mode: "Terminate" # Valid Values: Terminate or Passthrough
+    certificate:
+      generate: true
+      algorithm: RSA
+      keySize: 4096   # Recommended values are > 2048; NSA Guideline is > 3072 for RSA keys
+      duration: 2160h   # Value in Hours that the certificate is good for; chart default is 90 days
+      renewBefore: 360h # Value in Hours when the certificate should be renewed before expiration; chart default is 15 days
+      organization: ""
+    issuer: "" 
+    issuerKind: ClusterIssuer   # Value Values: ClusterIssuer or Issuer
+  # -- Additional custom labels to add to the HTTPRoute metadata
+  # Useful for tagging, selecting, or applying policies to the Ingress via labels.
+  extraLabels: {}
+  # extraLabels:
+  #   app.kubernetes.io/environment: "staging"
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+config:
+  # Configure the SearXNG Settings IAW https://docs.searxng.org/admin/settings/index.html
+  settings:
+    enabled: true
+    data: |-
+      # see https://docs.searxng.org/admin/settings/settings.html#settings-use-default-settings
+      use_default_settings: true
+
+      # See https://docs.searxng.org/admin/settings/settings_server.html
+      server:
+        secret_key: "d144c2b40b5189697affbd999d73bc1b0cdb1463ff40302107aa92e365ce67a7"
+        limiter: true  # enable this when running the instance for a public usage on the internet
+        image_proxy: true
+        public_instance: true
+        method: "GET" # Alternatives are GET and POST; 
+        default_http_headers:
+          X-Content-Type-Options : nosniff
+          X-Download-Options : noopen
+          X-Robots-Tag : noindex, nofollow
+          Referrer-Policy : no-referrer
+
+      general:
+        instance_name: "HomeLab SearXNG"
+        #contact_url: "mailto:your@email.com"
+        enable_metrics: true
+
+      # See https://docs.searxng.org/admin/settings/settings_search.html
+      search:
+        safe_search: 1  # 0: None, 1: Moderate, 2: Strict
+        autocomplete: ""  # Leave blank to disable
+        languages:
+          - en
+          - en-US
+          - ko
+          - ko-KR
+
+      ui:
+        default_locale: "en"
+        query_in_title: false
+        infinite_scroll: false
+        center_alignment: false
+        cache_url: https://web.archive.org/web/
+
+      valkey:
+        url: valkey://valkey:6379/0
+
+  # Configure according to https://docs.searxng.org/admin/searx.limiter.html
+  limiter:
+    enabled: true
+    data: |-
+      [botdetection.ip_limit]
+      # activate link_token method in the ip_limit method
+      link_token = true
+
+valkey:
+  podSecurityContext:
+    fsGroup: 1000
+    runAsUser: 1000
+    runAsGroup: 1000
+
+  securityContext:
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+      - ALL
+
+  # Resource limits/requests for the main Valkey container
+  resources: {}
+    # Example:
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # Persistent storage configuration
+  dataStorage:
+    # Enable persistent volume claim creation
+    enabled: false
+    # Use existing PVC by name (skip dynamic provisioning if set)
+    persistentVolumeClaimName: ""
+    # Name of the volume (referenced in deployment)
+    volumeName: "valkey-data"
+    # Request size (e.g. 5Gi) for dynamically provisioned volume
+    requestedSize: ""
+    # Name of the storage class to use
+    className: ""
+    # Access modes for the PVC (e.g., ReadWriteOnce, ReadWriteMany)
+    accessModes:
+      - ReadWriteOnce
+    # If true, keep the PVC on Helm uninstall
+    keepPvc: false
+    # Optional annotations to add to the PVC
+    annotations: {}
+    # Optional labels to add to the PVC
+    labels: {}
+
+  # Valkey logging level: debug, verbose, notice, warning
+  valkeyLogLevel: "notice"

@@ -1,0 +1,35 @@
+{{- if .Values.httproute.gateway.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "searxng.name" . }}
+  namespace: {{ include "searxng.namespace" . }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+    {{- with .Values.httproute.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if .Values.httproute.annotations }}
+  annotations:
+    {{- tpl (toYaml .Values.httproute.annotations | nindent 4) . }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.httproute.gateway.class }}
+  listeners:
+    - name: https
+      protocol: {{ .Values.httproute.gateway.listener.protocol | default "HTTPS" | quote }}
+      port: {{ .Values.httproute.gateway.listener.port | default 443 }}
+      hostname: {{ .Values.httproute.hostname | quote }}
+      {{- if .Values.httproute.tls.enabled }}
+      tls:
+        mode: {{ .Values.httproute.tls.mode | default "Terminate" | quote }}
+        {{- if eq .Values.httproute.tls.mode "Terminate" }}
+        certificateRefs:
+          - name: {{ include "searxng.name" . }}-tls
+            namespace: {{ include "searxng.namespace" . }}
+        {{- end }}
+      {{- end }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+{{- end }}

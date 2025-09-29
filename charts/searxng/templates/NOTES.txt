@@ -1,0 +1,16 @@
+
+Congratulations! SearXNG {{ .Chart.AppVersion }} has been deployed successfully!
+
+Information on the full range of options and capabilities can be found at their website, {{ .Chart.Home }}
+
+In order to use this application, navigate to the following URL:
+
+{{- if .Values.ingress.enabled }}
+
+Ingress has been enabled. Access the application at: http{{ if .Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.host }}
+{{- end }}
+
+{{- if .Values.httproute.enabled }}
+Gateway API is enabled. Access the application at: http{{ if .Values.httproute.tls.enabled }}s{{ end }}://{{ .Values.httproute.hostname }}
+{{- end }}
+

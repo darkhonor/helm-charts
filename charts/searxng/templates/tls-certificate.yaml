@@ -1,0 +1,29 @@
+{{- if .Values.httproute.tls.certificate.generate }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "searxng.name" . }}
+  namespace: {{ include "searxng.namespace" . }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "searxng.name" . }}-tls
+  privateKey:
+    rotationPolicy: "Always"  # Default for cert-manager > v1.18.0
+    algorithm: {{ .Values.httproute.tls.certificate.algorithm | default "RSA" | quote }}
+    size: {{ .Values.httproute.tls.certificate.keySize | default 4096 }}
+  duration: {{ .Values.httproute.tls.certificate.duration | default "2160h" | quote }} 
+  renewBefore: {{ .Values.httproute.tls.certificate.renewBefore | default "360h" | quote }} 
+  isCA: false
+  usages:
+    - server auth
+  subject:
+    organizations:
+      - {{ .Values.httproute.tls.certificate.organization | default "Production" | quote }} 
+  commonName: {{ .Values.httproute.hostname }} 
+  dnsNames:
+    - {{ .Values.httproute.hostname }} 
+  issuerRef:
+    name: {{ .Values.httproute.tls.issuer }} 
+    kind: {{ .Values.httproute.tls.issuerKind }} 
+{{- end }}
