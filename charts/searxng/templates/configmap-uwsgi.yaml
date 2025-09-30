@@ -1,0 +1,12 @@
+{{- if .Values.config.uwsgi.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "searxng.fullname" . }}-uwsgi
+  namespace: {{ include "searxng.namespace" . }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+data:
+  uwsgi.ini: |
+    {{- .Values.config.uwsgi.data | nindent 4 }}
+{{- end }}

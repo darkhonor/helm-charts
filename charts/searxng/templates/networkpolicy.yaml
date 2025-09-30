@@ -1,0 +1,117 @@
+# templates/networkpolicy.yaml
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "searxng.fullname" . }}
+  namespace: {{ include "searxng.namespace" . }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "searxng.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from Traefik Gateway pods
+    - from:
+        {{- if .Values.networkPolicy.gatewaySelector }}
+        # Option 1: Select Gateway pods by label (recommended for Traefik)
+        - namespaceSelector:
+            {{- if .Values.networkPolicy.gatewayNamespace }}
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.gatewayNamespace }}
+            {{- else }}
+            matchLabels: {}
+            {{- end }}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.gatewaySelector | nindent 14 }}
+        {{- else if .Values.networkPolicy.gatewayNamespace }}
+        # Option 2: Allow from entire Gateway namespace
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.gatewayNamespace }}
+        {{- else }}
+        # Option 3: Allow from any namespace (most permissive, works with any setup)
+        - namespaceSelector: {}
+        {{- end }}
+        {{- with .Values.networkPolicy.additionalIngressSources }}
+        # Additional custom ingress sources
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # DNS resolution (kube-dns/CoreDNS)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+    {{- if .Values.valkey.enabled }}
+    # Valkey/Redis connection (in same namespace)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: valkey
+              app.kubernetes.io/instance: {{ .Release.Name }}
+      ports:
+        - protocol: TCP
+          port: 6379
+    {{- else if .Values.networkPolicy.externalValkey }}
+    # External Valkey (if using external Redis)
+    - to:
+        {{- toYaml .Values.networkPolicy.externalValkey | nindent 8 }}
+      ports:
+        - protocol: TCP
+          port: 6379
+    {{- end }}
+    {{- if .Values.networkPolicy.allowExternalEgress }}
+    # Allow egress to external IPs (search engines on the internet)
+    # This is REQUIRED for SearXNG to function - it needs to query external search engines
+    - to:
+        - namespaceSelector:
+            matchExpressions:
+              - key: "kubernetes.io/metadata.name"
+                operator: DoesNotExist
+      ports:
+        - protocol: TCP
+          port: 443
+    {{- if .Values.networkPolicy.allowHTTP }}
+        - protocol: TCP
+          port: 80
+    {{- end }}
+    {{- else }}
+    # Restricted mode: only allow to specific CIDR blocks
+    {{- if .Values.networkPolicy.allowedCIDRs }}
+    - to:
+        {{- range .Values.networkPolicy.allowedCIDRs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: 443
+    {{- if .Values.networkPolicy.allowHTTP }}
+        - protocol: TCP
+          port: 80
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- with .Values.networkPolicy.additionalEgressRules }}
+    # Additional custom egress rules
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

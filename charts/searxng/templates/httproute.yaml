@@ -15,7 +15,7 @@ metadata:
   {{- end }}
 spec:
   parentRefs:
-    - name: {{ include "searxng.name" . }}
+    - name: {{ include "searxng.fullname" . }}-gateway
       namespace: {{ include "searxng.namespace" . }}
   hostnames:
     - {{ .Values.httproute.hostname | quote }}
@@ -25,7 +25,7 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: {{ include "searxng.name" . }}
+        - name: {{ include "searxng.fullname" . }}
           namespace: {{ include "searxng.namespace" . }}
           port: {{ .Values.service.port }}
 {{- end }}

@@ -2,7 +2,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: {{ include "searxng.name" . }}
+  name: {{ include "searxng.fullname" . }}-gateway
   namespace: {{ include "searxng.namespace" . }}
   labels:
     {{- include "searxng.labels" . | nindent 4 }}

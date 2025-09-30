@@ -33,6 +33,26 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.dns.configure }}
+      dnsPolicy: {{ .Values.dns.policy | quote }}
+      dnsConfig:
+        {{- with .Values.dns.config.nameservers }}
+        nameservers:
+          - 10.43.0.10
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.dns.config.searches }}
+        searches:
+          {{- toYaml . | nindent 10 }}
+          - svc.cluster.local
+          - cluster.local
+        {{- end }}
+        {{- with .Values.dns.config.options }}
+        options:
+          {{- toYaml . | nindent 10 }}
+          - name: edns0
+        {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
@@ -47,6 +67,8 @@ spec:
               protocol: TCP
           env:
             - name: SEARXNG_BASE_URL
+              value: https://{{ .Values.httproute.hostname | quote }}
+            - name: SEARXNG_HOSTNAME
               value: {{ .Values.httproute.hostname | quote }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
@@ -73,6 +95,12 @@ spec:
               subPath: limiter.toml
               readOnly: true
           {{- end }}
+          {{- if .Values.config.uwsgi.enabled }}
+            - mountPath: /etc/searxng/uwsgi.ini
+              name: searxng-uwsgi
+              subPath: uwsgi.ini
+              readOnly: true
+          {{- end }}
             - mountPath: /tmp
               name: searxng-tmp
           {{- with .Values.volumeMounts }}
@@ -88,6 +116,11 @@ spec:
         - name: searxng-limiter
           configMap:
             name: {{ include "searxng.fullname" . }}-limiter
+      {{- end }}
+      {{- if .Values.config.uwsgi.enabled }}
+        - name: searxng-uwsgi
+          configMap:
+            name: searxng-uwsgi
       {{- end }}
         - name: searxng-tmp
           emptyDir: {}
