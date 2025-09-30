@@ -59,6 +59,49 @@ entries:
       licenses: MIT
     apiVersion: v2
     appVersion: 0.6.31
+    created: "2025-09-30T14:40:31.963989502Z"
+    dependencies:
+    - condition: ollama.enabled
+      import-values:
+      - child: service
+        parent: ollama.service
+      name: ollama
+      repository: https://helm.otwld.com/
+      version: '>=0.24.0'
+    - condition: pipelines.enabled
+      import-values:
+      - child: service
+        parent: pipelines.service
+      name: pipelines
+      repository: https://helm.openwebui.com
+      version: '>=0.0.1'
+    - condition: tika.enabled
+      name: tika
+      repository: https://apache.jfrog.io/artifactory/tika
+      version: '>=2.9.0'
+    description: "Open WebUI: A User-Friendly Web Interface for Chat Interactions
+      \U0001F44B"
+    digest: 30b0c6581f64116f7f947e9628adaa116df3e4c443c5dec234a197f811b544aa
+    home: https://www.openwebui.com/
+    icon: https://raw.githubusercontent.com/open-webui/open-webui/main/static/favicon.png
+    keywords:
+    - llm
+    - chat
+    - web-ui
+    - open-webui
+    name: open-webui
+    sources:
+    - https://github.com/open-webui/helm-charts
+    - https://github.com/open-webui/open-webui/pkgs/container/open-webui
+    - https://github.com/otwld/ollama-helm/
+    - https://hub.docker.com/r/ollama/ollama
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/open-webui-1.0.11/open-webui-1.0.11.tgz
+    version: 1.0.11
+  - annotations:
+      licenses: MIT
+    apiVersion: v2
+    appVersion: 0.6.31
     created: "2025-09-27T15:12:50.548858819Z"
     dependencies:
     - condition: ollama.enabled
@@ -485,4 +528,35 @@ entries:
     urls:
     - https://github.com/darkhonor/helm-charts/releases/download/open-webui-1.0.1/open-webui-1.0.1.tgz
     version: 1.0.1
-generated: "2025-09-27T15:12:50.548906017Z"
+  searxng:
+  - annotations:
+      licenses: Apache-2.0
+    apiVersion: v2
+    appVersion: 2025.9.29-77fd3ee53
+    created: "2025-09-30T14:40:32.134067842Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.7.2
+    description: SearXNG is a free internet metasearch engine
+    digest: fdb83febb52af8a88c89947fe7c9092b163012873143b83b64627e33d630f0ab
+    home: https://docs.searxng.org
+    keywords:
+    - searxng
+    - search
+    - metasearch
+    - kubernetes
+    - privacy
+    maintainers:
+    - name: darkhonor
+      url: https://www.vmhomelab.org
+    name: searxng
+    sources:
+    - https://github.com/darkhonor/helm-charts
+    - https://github.com/searxng/searxng
+    type: application
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/searxng-0.1.0/searxng-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-09-30T14:40:32.134132423Z"
