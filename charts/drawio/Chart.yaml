@@ -4,6 +4,6 @@ description: A Helm chart for draw.io
 
 type: application
 
-version: 1.0.0
+version: 28.2.0
 
 appVersion: "28.2.0"
