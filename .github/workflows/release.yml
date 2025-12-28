@@ -23,6 +23,20 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - name: Sync chart versions with appVersion
+        run: |
+          for chart in charts/*/Chart.yaml; do
+            if [[ -f "$chart" ]]; then
+              # Extract appVersion from Chart.yaml
+              APP_VERSION=$(yq e '.appVersion' "$chart" | tr -d '"')
+              
+              if [[ -n "$APP_VERSION" && "$APP_VERSION" != "null" ]]; then
+                echo "Updating $chart: version -> $APP_VERSION"
+                yq e -i ".version = \"$APP_VERSION\"" "$chart"
+              fi
+            fi
+          done
+
       - name: Add repositories
         run: |
           for dir in $(ls -d charts/*/); do
