@@ -144,4 +144,34 @@ entries:
     urls:
     - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
     version: 2025.9.29-77fd3ee53
-generated: "2026-02-19T14:09:36.236468595Z"
+  - annotations:
+      licenses: Apache-2.0
+    apiVersion: v2
+    appVersion: 2025.9.29-77fd3ee53
+    created: "2026-02-19T14:11:30.469064734Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.9.3
+    description: SearXNG is a free internet metasearch engine
+    digest: d141c4a5fbceb07005b02f450ceededc5be23729eba32e0ea46eebb26ef3137b
+    home: https://docs.searxng.org
+    keywords:
+    - searxng
+    - search
+    - metasearch
+    - kubernetes
+    - privacy
+    maintainers:
+    - name: darkhonor
+      url: https://www.vmhomelab.org
+    name: searxng
+    sources:
+    - https://github.com/darkhonor/helm-charts
+    - https://github.com/searxng/searxng
+    type: application
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
+    version: 2025.9.29-77fd3ee53
+generated: "2026-02-19T14:11:30.469111527Z"
