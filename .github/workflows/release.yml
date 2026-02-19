@@ -23,13 +23,28 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Sync chart versions with appVersion
+      - name: Sync appVersion from image tag
+        run: |
+          for chart_dir in charts/*/; do
+            values="$chart_dir/values.yaml"
+            chart="$chart_dir/Chart.yaml"
+            if [[ -f "$values" && -f "$chart" ]]; then
+              IMAGE_TAG=$(yq e '.image.tag' "$values" | tr -d '"')
+              if [[ -n "$IMAGE_TAG" && "$IMAGE_TAG" != "null" ]]; then
+                CURRENT_APP_VERSION=$(yq e '.appVersion' "$chart" | tr -d '"')
+                if [[ "$IMAGE_TAG" != "$CURRENT_APP_VERSION" ]]; then
+                  echo "Syncing $chart: appVersion '$CURRENT_APP_VERSION' -> '$IMAGE_TAG' (from values.yaml image.tag)"
+                  yq e -i ".appVersion = \"$IMAGE_TAG\"" "$chart"
+                fi
+              fi
+            fi
+          done
+
+      - name: Sync chart version with appVersion
         run: |
           for chart in charts/*/Chart.yaml; do
             if [[ -f "$chart" ]]; then
-              # Extract appVersion from Chart.yaml
               APP_VERSION=$(yq e '.appVersion' "$chart" | tr -d '"')
-              
               if [[ -n "$APP_VERSION" && "$APP_VERSION" != "null" ]]; then
                 echo "Updating $chart: version -> $APP_VERSION"
                 yq e -i ".version = \"$APP_VERSION\"" "$chart"
