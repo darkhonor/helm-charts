@@ -52,10 +52,16 @@ jobs:
             fi
           done
 
-      - name: Add repositories
+      - name: Add repositories and update dependencies
         run: |
           for dir in $(ls -d charts/*/); do
             helm dependency list $dir 2> /dev/null | tail +2 | head -n -1 | awk '{ print "helm repo add " $1 " " $3 }' | while read cmd; do $cmd; done
+          done
+          for dir in $(ls -d charts/*/); do
+            if [[ -f "$dir/Chart.lock" ]]; then
+              echo "Updating dependencies for $dir"
+              helm dependency update "$dir"
+            fi
           done
 
       - name: Run chart-releaser
