@@ -28,7 +28,7 @@ dependencies:
     condition: ollama.enabled
   - name: pipelines
     repository: https://helm.openwebui.com
-    version: 0.10.0
+    version: 0.10.1
     import-values:
       - child: service
         parent: pipelines.service
