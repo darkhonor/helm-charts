@@ -24,6 +24,22 @@ entries:
     version: 28.2.0
   local-path-provisioner:
   - apiVersion: v1
+    appVersion: v0.0.34
+    created: "2026-02-19T14:48:17.403725921Z"
+    description: Use HostPath for persistent local storage with Kubernetes
+    digest: 2effcbd2eb31663bdc7d35fea2b5a785a5b84cf560193f363502dbe3be859df2
+    home: https://github.com/rancher/local-path-provisioner
+    keywords:
+    - storage
+    - hostpath
+    kubeVersion: '>=1.12.0-r0'
+    name: local-path-provisioner
+    sources:
+    - https://github.com/rancher/local-path-provisioner.git
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/local-path-provisioner-v0.0.34/local-path-provisioner-v0.0.34.tgz
+    version: v0.0.34
+  - apiVersion: v1
     appVersion: v0.0.33
     created: "2025-12-28T08:54:28.424419512Z"
     description: Use HostPath for persistent local storage with Kubernetes
@@ -204,4 +220,34 @@ entries:
     urls:
     - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
     version: 2025.9.29-77fd3ee53
-generated: "2026-02-19T14:12:05.742263073Z"
+  - annotations:
+      licenses: Apache-2.0
+    apiVersion: v2
+    appVersion: 2025.9.29-77fd3ee53
+    created: "2026-02-19T14:48:17.731417646Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.9.3
+    description: SearXNG is a free internet metasearch engine
+    digest: 3f76226bccd1b9e5e55469621a59ac8783e06a4c6bd43bdecb3417950056a6d1
+    home: https://docs.searxng.org
+    keywords:
+    - searxng
+    - search
+    - metasearch
+    - kubernetes
+    - privacy
+    maintainers:
+    - name: darkhonor
+      url: https://www.vmhomelab.org
+    name: searxng
+    sources:
+    - https://github.com/darkhonor/helm-charts
+    - https://github.com/searxng/searxng
+    type: application
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
+    version: 2025.9.29-77fd3ee53
+generated: "2026-02-19T14:48:17.73144711Z"
