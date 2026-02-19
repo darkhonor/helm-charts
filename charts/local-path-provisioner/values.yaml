@@ -6,7 +6,7 @@ namespaceOverride: ""
 
 image:
   repository: rancher/local-path-provisioner
-  tag: 0.0.34
+  tag: v0.0.34
   pullPolicy: IfNotPresent
 
 helperImage:
