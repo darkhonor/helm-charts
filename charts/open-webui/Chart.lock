@@ -8,5 +8,10 @@ dependencies:
 - name: tika
   repository: https://apache.jfrog.io/artifactory/tika
   version: 3.2.2
+<<<<<<< dependabot/helm/charts/open-webui/ollama-1.43.0
+digest: sha256:211f66b171da417f8ab4e79ecfff2b307c5242bb6f747bd14a8b02dbd5c0c4b8
+generated: "2026-02-16T07:27:26.641458474Z"
+=======
 digest: sha256:b6060ef551eedebb4ed9b47c7158a4929f75c89f1b00dce0a063c5e5617dadf6
 generated: "2026-02-16T07:27:24.266956201Z"
+>>>>>>> main
