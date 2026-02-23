@@ -29,23 +29,33 @@ spec:
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
-      {{- if .Values.securityContext.enabled }}
+      {{- with .Values.podSecurityContext }}
       securityContext:
-        fsGroup: {{ .Values.securityContext.fsGroup }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       {{- if or (and .Values.volumePermissions.enabled .Values.persistence.enabled) .Values.extraInitContainers }}
       initContainers:
       {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
       - name: init-chmod-data
-        image: busybox:latest
-        imagePullPolicy: IfNotPresent
+        image: "{{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}"
+        imagePullPolicy: {{ .Values.initContainer.pullPolicy }}
         command:
           - sh
           - -c
           - |
-            chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.fsGroup }} /home/coder
+            chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /home/coder
         securityContext:
-          runAsUser: {{ .Values.volumePermissions.securityContext.runAsUser }}
+          runAsUser: 0
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - CHOWN
+              - FOWNER
+          seccompProfile:
+            type: RuntimeDefault
         volumeMounts:
         - name: data
           mountPath: /home/coder
@@ -61,9 +71,9 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.securityContext.enabled }}
+          {{- with .Values.containerSecurityContext }}
           securityContext:
-            runAsUser: {{ .Values.securityContext.runAsUser }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- if .Values.lifecycle.enabled }}
           lifecycle:
@@ -96,6 +106,8 @@ spec:
           volumeMounts:
           - name: data
             mountPath: /home/coder
+          - name: tmp
+            mountPath: /tmp
           {{- range .Values.extraConfigmapMounts }}
           - name: {{ .name }}
             mountPath: {{ .mountPath }}
@@ -160,10 +172,12 @@ spec:
         hostPath:
           path: {{ .Values.persistence.hostPath }}
           type: Directory
-        {{- end -}}
+        {{- end }}
       {{- else }}
         emptyDir: {}
-      {{- end -}}
+      {{- end }}
+      - name: tmp
+        emptyDir: {}
       {{- range .Values.extraSecretMounts }}
       - name: {{ .name }}
         secret:
