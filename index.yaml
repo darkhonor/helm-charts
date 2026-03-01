@@ -23,6 +23,16 @@ entries:
     version: 4.108.0
   drawio:
   - apiVersion: v2
+    appVersion: 29.5.2
+    created: "2026-03-01T07:04:40.695956036Z"
+    description: A Helm chart for draw.io
+    digest: e3c8e71cc27bf5f2323e13c6b4a44882abe8c0d7e5e67a9794b067b0a1435855
+    name: drawio
+    type: application
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/drawio-29.5.2/drawio-29.5.2.tgz
+    version: 29.5.2
+  - apiVersion: v2
     appVersion: 28.2.0
     created: "2025-12-28T08:54:28.292804148Z"
     description: A Helm chart for draw.io
@@ -410,4 +420,34 @@ entries:
     urls:
     - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
     version: 2025.9.29-77fd3ee53
-generated: "2026-03-01T07:02:54.42358707Z"
+  - annotations:
+      licenses: Apache-2.0
+    apiVersion: v2
+    appVersion: 2025.9.29-77fd3ee53
+    created: "2026-03-01T07:04:41.253182941Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.9.3
+    description: SearXNG is a free internet metasearch engine
+    digest: 05c12bfe8aff07df4da954e3d9bc82bcfcfe806f7bc5ecdfdfb6f2047352acef
+    home: https://docs.searxng.org
+    keywords:
+    - searxng
+    - search
+    - metasearch
+    - kubernetes
+    - privacy
+    maintainers:
+    - name: darkhonor
+      url: https://www.vmhomelab.org
+    name: searxng
+    sources:
+    - https://github.com/darkhonor/helm-charts
+    - https://github.com/searxng/searxng
+    type: application
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
+    version: 2025.9.29-77fd3ee53
+generated: "2026-03-01T07:04:41.253239206Z"
