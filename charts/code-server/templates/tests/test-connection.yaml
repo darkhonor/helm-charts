@@ -7,9 +7,25 @@ metadata:
   annotations:
     "helm.sh/hook": test
 spec:
+  automountServiceAccountToken: false
+  {{- with .Values.podSecurityContext }}
+  securityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   containers:
     - name: wget
-      image: busybox
+      image: "{{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}"
+      imagePullPolicy: {{ .Values.initContainer.pullPolicy }}
       command: ['wget']
-      args:  ['{{ include "code-server.fullname" . }}:{{ .Values.service.port }}/healthz']
+      args: ['{{ include "code-server.fullname" . }}:{{ .Values.service.port }}/healthz']
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
   restartPolicy: Never
