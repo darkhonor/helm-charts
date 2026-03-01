@@ -165,14 +165,11 @@ spec:
       volumes:
       - name: data
       {{- if .Values.persistence.enabled }}
-        {{- if not .Values.persistence.hostPath }}
+        {{- if .Values.persistence.hostPath }}
+        {{- fail "persistence.hostPath is prohibited — hostPath volumes violate PSS restricted profile and NIST SP800-53 SC-28. Use a PVC with an encrypted StorageClass instead." }}
+        {{- end }}
         persistentVolumeClaim:
           claimName: {{ .Values.persistence.existingClaim | default (include "code-server.fullname" .) }}
-        {{- else }}
-        hostPath:
-          path: {{ .Values.persistence.hostPath }}
-          type: Directory
-        {{- end }}
       {{- else }}
         emptyDir: {}
       {{- end }}
