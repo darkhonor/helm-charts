@@ -131,20 +131,14 @@ extraVars: []
 #    value: "tcp://localhost:2376"
 
 ## Init containers parameters:
-## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
-##
+## volumePermissions: Runs an init container as root to chown the PVC mount.
+## DISABLED by default — fsGroupChangePolicy: OnRootMismatch (set in podSecurityContext)
+## handles PVC ownership via the kubelet without requiring root.
+## Enable ONLY in non-restricted namespaces with storage backends that don't
+## support fsGroup-based ownership (rare). Requires PSS baseline or privileged profile.
+## NIST 800-53: AC-6 — Least privilege; avoid root containers when possible.
 volumePermissions:
-  enabled: true
-  securityContext:
-    runAsUser: 0
-
-## Pod Security Context
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-##
-securityContext:
-  enabled: true
-  fsGroup: 1000
-  runAsUser: 1000
+  enabled: false
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
