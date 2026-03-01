@@ -279,7 +279,7 @@ extraPorts: []
 ## NIST 800-53: SC-7 (Boundary Protection), CM-7 (Least Functionality)
 ## Enforces deny-by-default with controlled ingress/egress
 networkPolicy:
-  enabled: false
+  enabled: true
   # -- Namespace where the Gateway (Traefik) pods run
   gatewayNamespace: kube-system
   # -- Pod selector labels for Gateway pods (recommended for Traefik)

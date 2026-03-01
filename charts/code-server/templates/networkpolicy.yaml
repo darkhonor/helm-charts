@@ -44,10 +44,15 @@ spec:
           port: 8080
   egress:
     # DNS resolution (kube-dns/CoreDNS)
+    # Scoped to pods labeled k8s-app=kube-dns in kube-system, OR any namespace
+    # (covers CoreDNS in non-standard namespaces like node-local-dns)
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
         - namespaceSelector: {}
           podSelector:
             matchLabels:
