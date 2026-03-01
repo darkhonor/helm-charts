@@ -1,0 +1,45 @@
+{{- if .Values.httproute.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "code-server.fullname" . }}
+  labels:
+    {{- include "code-server.labels" . | nindent 4 }}
+    {{- with .Values.httproute.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.httproute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- range .Values.httproute.parentRefs }}
+    - name: {{ .name }}
+      namespace: {{ .namespace }}
+      {{- if .sectionName }}
+      sectionName: {{ .sectionName }}
+      {{- end }}
+      {{- if .port }}
+      port: {{ .port }}
+      {{- end }}
+    {{- end }}
+  {{- if .Values.httproute.hostnames }}
+  hostnames:
+    {{- range .Values.httproute.hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- if .Values.httproute.rules }}
+    {{- toYaml .Values.httproute.rules | nindent 4 }}
+    {{- else }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "code-server.fullname" . }}
+          port: {{ .Values.service.port }}
+    {{- end }}
+{{- end }}

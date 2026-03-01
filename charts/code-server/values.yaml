@@ -6,8 +6,15 @@ replicaCount: 1
 
 image:
   repository: codercom/code-server
-  tag: '4.108.0'
-  pullPolicy: Always
+  tag: '4.109.2'
+  pullPolicy: IfNotPresent
+
+# Init container image used for volume permission fixes (pinned, no 'latest')
+# NIST 800-53: CM-6, SI-2 — pin all images to immutable tags
+initContainer:
+  image: busybox
+  tag: '1.37.0'
+  pullPolicy: IfNotPresent
 
 # Specifies one or more secrets to be used when pulling images from a
 # private container repository
@@ -19,7 +26,11 @@ nameOverride: ""
 fullnameOverride: ""
 hostnameOverride: ""
 
-# The existing secret to use for code-server authentication in the frontend. the password is stored in the secret under the key `password`
+# The existing secret to use for code-server authentication.
+# The password is stored in the secret under the key `password`.
+# NIST 800-53: IA-5 — For compliance deployments, MUST use existingSecret
+# provisioned through an approved secret management workflow
+# (External Secrets, Vault, sealed-secrets, etc.)
 # existingSecret: ""
 
 serviceAccount:
@@ -30,16 +41,34 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
+  # NIST 800-53: AC-6 — Disable automatic mounting of API credentials
+  automountServiceAccountToken: false
 
 # Specifies annotations for deployment
 annotations: {}
 
 podAnnotations: {}
 
+## Pod Security Context
+## NIST 800-53: AC-6, CM-6 — Enforce least privilege at pod level
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 podSecurityContext:
-  fsGroupChangePolicy: Always
-  fsGroup: 1000
   runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+
+## Container Security Context
+## NIST 800-53: AC-6, CM-6, CM-7 — Harden container runtime
+containerSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
   seccompProfile:
     type: RuntimeDefault
 
@@ -49,19 +78,34 @@ service:
   type: ClusterIP
   port: 8080
 
-ingress:
+# Gateway API HTTPRoute configuration
+# Requires an existing Gateway resource. TLS termination is handled at the Gateway level.
+# Ref: https://gateway-api.sigs.k8s.io/api-types/httproute/
+httproute:
   enabled: false
-  #annotations:
-  #  kubernetes.io/tls-acme: "true"
-  #hosts:
-  #  - host: code-server.example.loc
-  #    paths:
-  #      - /
-  ingressClassName: ""
-  #tls:
-  #  - secretName: code-server
-  #    hosts:
-  #      - code-server.example.loc
+  # -- Annotations to add to the HTTPRoute
+  annotations: {}
+  # -- Additional labels to add to the HTTPRoute
+  extraLabels: {}
+  # -- Parent Gateway references. The HTTPRoute attaches to these Gateways.
+  parentRefs:
+    - name: traefik-gateway
+      namespace: kube-system
+      # sectionName: websecure  # Optional: target a specific Gateway listener
+      # port: 443               # Optional: target a specific port
+  # -- Hostnames for routing. Must match a listener on the parent Gateway.
+  hostnames:
+    - code-server.example.loc
+  # -- Override the default routing rules. If not set, defaults to PathPrefix "/"
+  # -- pointing to the code-server service.
+  # rules:
+  #   - matches:
+  #       - path:
+  #           type: PathPrefix
+  #           value: /
+  #     backendRefs:
+  #       - name: my-service
+  #         port: 8080
 
 # Optional additional arguments
 extraArgs: []
@@ -86,32 +130,21 @@ extraVars: []
 #  - name: DOCKER_HOST
 #    value: "tcp://localhost:2376"
 
-##
 ## Init containers parameters:
 ## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
-## NOTE: Disabled by default - podSecurityContext.fsGroupChangePolicy handles volume ownership.
-##       Enable only in environments that do NOT enforce restricted Pod Security Standards.
 ##
 volumePermissions:
-  enabled: false
+  enabled: true
   securityContext:
     runAsUser: 0
 
-## Container Security Context (restricted Pod Security Standard)
+## Pod Security Context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 ##
 securityContext:
+  enabled: true
+  fsGroup: 1000
   runAsUser: 1000
-  runAsGroup: 1000
-  runAsNonRoot: true
-  privileged: false
-  allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: false
-  capabilities:
-    drop:
-      - ALL
-  seccompProfile:
-    type: RuntimeDefault
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -138,6 +171,9 @@ tolerations: []
 affinity: {}
 
 ## Persist data to a persistent volume
+## NIST 800-53: SC-28 — For compliance, use an encrypted StorageClass backed by
+## KMS or provider-managed encryption. Do not rely on default StorageClass unless
+## verified encrypted. hostPath is high-risk and should not be used in compliance deployments.
 persistence:
   enabled: true
   ## code-server data Persistent Volume Storage Class
@@ -244,3 +280,22 @@ extraPorts: []
   # - name: minecraft
   #   port: 25565
   #   protocol: tcp
+
+## Network Policy
+## NIST 800-53: SC-7 (Boundary Protection), CM-7 (Least Functionality)
+## Enforces deny-by-default with controlled ingress/egress
+networkPolicy:
+  enabled: false
+  # -- Namespace where the Gateway (Traefik) pods run
+  gatewayNamespace: kube-system
+  # -- Pod selector labels for Gateway pods (recommended for Traefik)
+  # If set, restricts ingress to only matching pods in gatewayNamespace
+  # If empty, allows from entire gatewayNamespace
+  gatewaySelector: {}
+    # app.kubernetes.io/name: traefik
+  # -- Additional ingress sources beyond the Gateway
+  additionalIngressSources: []
+  # -- Allow outbound HTTPS (443) for extension marketplace and git operations
+  allowExternalHTTPS: true
+  # -- Additional custom egress rules
+  additionalEgressRules: []

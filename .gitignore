@@ -97,3 +97,7 @@ sensitive.txt
 # Demo Values files for testing
 demo/
 charts/**/charts/
+
+**/.claude
+**/.mcp.json
+

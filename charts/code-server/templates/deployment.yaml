@@ -33,21 +33,29 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       {{- if or (and .Values.volumePermissions.enabled .Values.persistence.enabled) .Values.extraInitContainers }}
       initContainers:
       {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
       - name: init-chmod-data
-        image: busybox:latest
-        imagePullPolicy: IfNotPresent
+        image: "{{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}"
+        imagePullPolicy: {{ .Values.initContainer.pullPolicy }}
         command:
           - sh
           - -c
           - |
-            chown -R {{ .Values.securityContext.runAsUser | default 1000 }}:{{ .Values.podSecurityContext.fsGroup | default 1000 }} /home/coder
-        {{- with .Values.volumePermissions.securityContext }}
+            chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /home/coder
         securityContext:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
+          runAsUser: 0
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - CHOWN
+              - FOWNER
+          seccompProfile:
+            type: RuntimeDefault
         volumeMounts:
         - name: data
           mountPath: /home/coder
@@ -63,7 +71,7 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- with .Values.securityContext }}
+          {{- with .Values.containerSecurityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -98,6 +106,8 @@ spec:
           volumeMounts:
           - name: data
             mountPath: /home/coder
+          - name: tmp
+            mountPath: /tmp
           {{- range .Values.extraConfigmapMounts }}
           - name: {{ .name }}
             mountPath: {{ .mountPath }}
@@ -162,10 +172,12 @@ spec:
         hostPath:
           path: {{ .Values.persistence.hostPath }}
           type: Directory
-        {{- end -}}
+        {{- end }}
       {{- else }}
         emptyDir: {}
-      {{- end -}}
+      {{- end }}
+      - name: tmp
+        emptyDir: {}
       {{- range .Values.extraSecretMounts }}
       - name: {{ .name }}
         secret:
