@@ -36,8 +36,12 @@ annotations: {}
 
 podAnnotations: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  fsGroupChangePolicy: Always
+  fsGroup: 1000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 
 priorityClassName: ""
 
@@ -85,19 +89,29 @@ extraVars: []
 ##
 ## Init containers parameters:
 ## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
+## NOTE: Disabled by default - podSecurityContext.fsGroupChangePolicy handles volume ownership.
+##       Enable only in environments that do NOT enforce restricted Pod Security Standards.
 ##
 volumePermissions:
-  enabled: true
+  enabled: false
   securityContext:
     runAsUser: 0
 
-## Pod Security Context
+## Container Security Context (restricted Pod Security Standard)
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 ##
 securityContext:
-  enabled: true
-  fsGroup: 1000
   runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  privileged: false
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
