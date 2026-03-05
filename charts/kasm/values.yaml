@@ -201,6 +201,22 @@ database:
   # database.labels -- Custom labels to add to the Kasm DB StatefulSet
   labels: {}
 
+# -- Pre-existing Kubernetes Secret for KASM application credentials.
+# When `existingSecret.name` is set, the pre-install password generation
+# hook is disabled and templates reference this secret instead.
+existingSecret:
+  # existingSecret.name -- Name of existing Secret. Leave empty to auto-generate.
+  name: ""
+  keys:
+    # existingSecret.keys.managerToken -- Key name for the manager token
+    managerToken: "manager-token"
+    # existingSecret.keys.serviceToken -- Key name for the service registration token
+    serviceToken: "service-token"
+    # existingSecret.keys.adminPassword -- Key name for the default admin password
+    adminPassword: "admin-password"
+    # existingSecret.keys.userPassword -- Key name for the default user password
+    userPassword: "user-password"
+
 # Configure the Kasm Database management functions
 #
 dbManagement:

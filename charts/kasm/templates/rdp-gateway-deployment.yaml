@@ -101,8 +101,13 @@ spec:
             - name: REGISTRATION_TOKEN
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.existingSecret.name }}
+                  name: {{ .Values.existingSecret.name }}
+                  key: {{ .Values.existingSecret.keys.serviceToken }}
+                  {{- else }}
                   name: {{ .Release.Name }}-secrets
                   key: service-token
+                  {{- end }}
             - name: KUBERNETES_SERVICE_HOST
               value: "true"
           ports:

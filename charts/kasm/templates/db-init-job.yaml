@@ -93,23 +93,43 @@ spec:
             - name: DEFAULT_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.existingSecret.name }}
+                  name: {{ .Values.existingSecret.name }}
+                  key: {{ .Values.existingSecret.keys.adminPassword }}
+                  {{- else }}
                   name: {{ .Release.Name }}-secrets
                   key: admin-password
+                  {{- end }}
             - name: DEFAULT_MANAGER_TOKEN
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.existingSecret.name }}
+                  name: {{ .Values.existingSecret.name }}
+                  key: {{ .Values.existingSecret.keys.managerToken }}
+                  {{- else }}
                   name: {{ .Release.Name }}-secrets
                   key: manager-token
+                  {{- end }}
             - name: DEFAULT_REGISTRATION_TOKEN
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.existingSecret.name }}
+                  name: {{ .Values.existingSecret.name }}
+                  key: {{ .Values.existingSecret.keys.serviceToken }}
+                  {{- else }}
                   name: {{ .Release.Name }}-secrets
                   key: service-token
+                  {{- end }}
             - name: DEFAULT_USER_PASSWORD
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.existingSecret.name }}
+                  name: {{ .Values.existingSecret.name }}
+                  key: {{ .Values.existingSecret.keys.userPassword }}
+                  {{- else }}
                   name: {{ .Release.Name }}-secrets
                   key: user-password
+                  {{- end }}
             {{- if and .Values.database.standalone .Values.database.postgresMasterUser }}
             - name: DATABASE_MASTER_USER
               value: {{ .Values.database.postgresMasterUser.username }}

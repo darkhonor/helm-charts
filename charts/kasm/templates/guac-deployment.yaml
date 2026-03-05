@@ -91,8 +91,13 @@ spec:
             - name: REGISTRATION_TOKEN
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.existingSecret.name }}
+                  name: {{ .Values.existingSecret.name }}
+                  key: {{ .Values.existingSecret.keys.serviceToken }}
+                  {{- else }}
                   name: {{ .Release.Name }}-secrets
                   key: service-token
+                  {{- end }}
             - name: ZONE
             {{- if .Values.kasmZones }}
               {{- with index .Values.kasmZones 0 }}
