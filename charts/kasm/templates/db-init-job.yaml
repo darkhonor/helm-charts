@@ -58,6 +58,11 @@ spec:
               value: {{ $constants.db.svc }}
             - name: POSTGRES_PORT
               value: {{ $constants.db.port | quote }}
+          {{- if .Values.applySecurity }}
+          volumeMounts:
+            - name: tmp-data
+              mountPath: /tmp
+          {{- end }}
           command:
             - "/bin/bash"
             - "-c"
@@ -139,10 +144,21 @@ spec:
                   name: {{ .Values.database.postgresMasterUser.secret.name }}
                   key: {{ .Values.database.postgresMasterUser.secret.key }}
             {{- end }}
+          {{- if .Values.applySecurity }}
+          volumeMounts:
+            - name: tmp-data
+              mountPath: /tmp
+          {{- end }}
           command:
             - "/bin/bash"
             - "-c"
           args:
             - |
               if [[ "$DB_AUTO_INITIALIZE" == "true" ]]; then /usr/bin/startup.sh; else echo "DB already initialized."; fi
+      {{- if .Values.applySecurity }}
+      volumes:
+        - name: tmp-data
+          emptyDir:
+            sizeLimit: 256Mi
+      {{- end }}
 {{- end }}
