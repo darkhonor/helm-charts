@@ -52,8 +52,9 @@ spec:
           - name: edns0
         {{- end }}
       {{- end }}
-      {{- if .Values.valkey.tls.enabled }}
+      {{- if or .Values.valkey.tls.enabled .Values.valkey.auth.enabled }}
       initContainers:
+      {{- if .Values.valkey.tls.enabled }}
         - name: ca-bundle
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           command: ['sh', '-c', 'cat /etc/ssl/certs/ca-certificates.crt /valkey-ca/ca.crt > /combined-ca/ca-bundle.crt 2>/dev/null || cat /etc/pki/tls/certs/ca-bundle.crt /valkey-ca/ca.crt > /combined-ca/ca-bundle.crt']
@@ -67,6 +68,53 @@ spec:
               readOnly: true
             - name: valkey-combined-ca
               mountPath: /combined-ca
+      {{- end }}
+        - name: wait-for-valkey
+          image: "docker.io/valkey/valkey:{{ .Values.valkey.image.tag | default "9.0.1" }}"
+          {{- $authFlag := "" }}
+          {{- if .Values.valkey.auth.enabled }}
+          {{- $authFlag = "-a $VALKEY_PASSWORD --no-auth-warning" }}
+          {{- end }}
+          {{- $tlsFlags := "" }}
+          {{- if .Values.valkey.tls.enabled }}
+          {{- $tlsFlags = "--tls --cacert /etc/ssl/valkey/ca-bundle.crt" }}
+          {{- end }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Valkey at {{ include "searxng.valkeyHost" . }}:{{ include "searxng.valkeyPort" . }}..."
+              until valkey-cli -h {{ include "searxng.valkeyHost" . }} -p {{ include "searxng.valkeyPort" . }} {{ $tlsFlags }} {{ $authFlag }} ping 2>/dev/null | grep -q PONG; do
+                echo "Valkey not ready, retrying in 2s..."
+                sleep 2
+              done
+              echo "Valkey is ready."
+          {{- if .Values.valkey.auth.enabled }}
+          env:
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "searxng.valkeyAuthSecretName" . }}
+                  key: {{ .Values.valkey.auth.key }}
+          {{- end }}
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+          {{- if .Values.valkey.tls.enabled }}
+          volumeMounts:
+            - name: valkey-combined-ca
+              mountPath: /etc/ssl/valkey/ca-bundle.crt
+              subPath: ca-bundle.crt
+              readOnly: true
+          {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
