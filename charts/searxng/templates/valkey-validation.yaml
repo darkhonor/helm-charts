@@ -4,6 +4,11 @@
 # Compliant With: DoD STIG, NIST SP800-53 Rev 5
 # Classification: UNCLASSIFIED
 
+{{/* Guard 0: mode must be "internal" or "external" */}}
+{{- if and (ne .Values.valkey.mode "internal") (ne .Values.valkey.mode "external") }}
+{{- fail "valkey.mode must be either 'internal' or 'external'." }}
+{{- end }}
+
 {{/* Guard 1: usersExistingSecret required when auth enabled in internal mode */}}
 {{- if and (eq .Values.valkey.mode "internal") .Values.valkey.auth.enabled (not .Values.valkey.auth.usersExistingSecret) }}
 {{- fail "valkey.auth.usersExistingSecret is required when valkey.auth.enabled is true in internal mode. Set it to the name of the Secret containing the Valkey password (e.g., '<release-name>-searxng-valkey-auth' for chart-generated passwords, or the same value as valkey.auth.existingSecret)." }}

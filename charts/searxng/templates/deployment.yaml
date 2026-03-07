@@ -52,6 +52,22 @@ spec:
           - name: edns0
         {{- end }}
       {{- end }}
+      {{- if .Values.valkey.tls.enabled }}
+      initContainers:
+        - name: ca-bundle
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: ['sh', '-c', 'cat /etc/ssl/certs/ca-certificates.crt /valkey-ca/ca.crt > /combined-ca/ca-bundle.crt 2>/dev/null || cat /etc/pki/tls/certs/ca-bundle.crt /valkey-ca/ca.crt > /combined-ca/ca-bundle.crt']
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: valkey-tls-ca
+              mountPath: /valkey-ca
+              readOnly: true
+            - name: valkey-combined-ca
+              mountPath: /combined-ca
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
@@ -83,7 +99,7 @@ spec:
           {{- end }}
           {{- if .Values.valkey.tls.enabled }}
             - name: SSL_CERT_FILE
-              value: "/etc/ssl/valkey/ca.crt"
+              value: "/etc/ssl/valkey/ca-bundle.crt"
           {{- end }}
             - name: SEARXNG_REDIS_URL
               value: {{ include "searxng.redisURL" . | quote }}
@@ -128,9 +144,9 @@ spec:
             - mountPath: /tmp
               name: searxng-tmp
           {{- if .Values.valkey.tls.enabled }}
-            - name: valkey-tls-ca
-              mountPath: /etc/ssl/valkey/ca.crt
-              subPath: ca.crt
+            - name: valkey-combined-ca
+              mountPath: /etc/ssl/valkey/ca-bundle.crt
+              subPath: ca-bundle.crt
               readOnly: true
           {{- end }}
           {{- with .Values.volumeMounts }}
@@ -161,6 +177,8 @@ spec:
             items:
               - key: ca.crt
                 path: ca.crt
+        - name: valkey-combined-ca
+          emptyDir: {}
       {{- end }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}

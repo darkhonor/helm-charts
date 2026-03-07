@@ -380,7 +380,7 @@ valkey:
     usersExistingSecret: ""
     aclUsers:
       default:
-        permissions: "~* &* +@all"
+        permissions: "~* &* +@read +@write +@connection +ping +select +info"
         passwordKey: "valkey-password"
 
   # TLS encryption configuration (applies to both internal and external modes)
