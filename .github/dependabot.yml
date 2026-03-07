@@ -1,20 +1,11 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+# Filename: dependabot.yml
+# Last Modified: 2026-03-07
+# Summary: Dependabot config scoped to GitHub Actions only; Helm and Docker managed by Renovate
+# Compliant With: NIST SP800-53 Rev 5 (SI-2 Flaw Remediation, CM-3 Configuration Change Control)
+# Classification: UNCLASSIFIED
 
 version: 2
 updates:
-  - package-ecosystem: "docker" # See documentation for possible values
-    directories: 
-      - "/charts/*"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "helm"
-    directories: 
-      - "/charts/*"
-    schedule:
-      interval: "daily"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
