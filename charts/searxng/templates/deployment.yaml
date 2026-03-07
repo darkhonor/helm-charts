@@ -33,12 +33,11 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.dns.configure }}
+      {{- if and .Values.dns .Values.dns.configure }}
       dnsPolicy: {{ .Values.dns.policy | quote }}
       dnsConfig:
         {{- with .Values.dns.config.nameservers }}
         nameservers:
-          - 10.43.0.10
           {{- toYaml . | nindent 10 }}
         {{- end }}
         {{- with .Values.dns.config.searches }}

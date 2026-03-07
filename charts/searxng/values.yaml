@@ -21,7 +21,7 @@ fullnameOverride: ""
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
   create: true
-  automount: true
+  automount: false
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -108,7 +108,7 @@ httproute:
   #   app.kubernetes.io/environment: "staging"
 
 networkPolicy:
-  enabled: false
+  enabled: true
   # Traefik Gateway namespace (adjust to your installation)
   gatewayNamespace: "traefik"  # Common: traefik, kube-system, or traefik-system
   # Select Traefik pods specifically (recommended)
@@ -244,7 +244,8 @@ config:
 
       # See https://docs.searxng.org/admin/settings/settings_server.html
       server:
-        secret_key: "changeme"  # Overridden at runtime by SEARXNG_SECRET env var from secrets.searxngSecret
+        # secret_key is injected via SEARXNG_SECRET env var from secrets.searxngSecret
+        # Do NOT set secret_key here — ConfigMaps are not encrypted at rest
         limiter: true  # enable this when running the instance for a public usage on the internet
         image_proxy: true
         public_instance: true

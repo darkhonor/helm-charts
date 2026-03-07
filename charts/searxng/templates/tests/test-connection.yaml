@@ -7,9 +7,28 @@ metadata:
   annotations:
     "helm.sh/hook": test
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
   containers:
     - name: wget
-      image: busybox
+      image: busybox:1.37.0
       command: ['wget']
-      args: ['{{ include "searxng.fullname" . }}:{{ .Values.service.port }}']
+      args: ['--spider', '{{ include "searxng.fullname" . }}:{{ .Values.service.port }}']
+      securityContext:
+        readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+      resources:
+        limits:
+          cpu: 100m
+          memory: 64Mi
+        requests:
+          cpu: 50m
+          memory: 32Mi
   restartPolicy: Never
