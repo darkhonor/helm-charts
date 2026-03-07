@@ -197,14 +197,15 @@ The chart supports three Valkey deployment modes:
 
 ### Internal Valkey (Default)
 
-The chart deploys a bundled Valkey instance via subchart. By default, TLS is
-enabled via a self-signed cert-manager Certificate.
+The chart deploys a bundled Valkey instance via subchart. TLS is disabled by
+default for backward compatibility. To enable TLS with auto-generated
+certificates via cert-manager:
 
 ```yaml
 valkey:
   mode: "internal"
   tls:
-    enabled: true  # Default — auto-generates certs via cert-manager
+    enabled: true  # Must be explicitly enabled
     # REQUIRED: set to "<release-name>-searxng-valkey-tls"
     existingSecret: "searxng-valkey-tls"
 ```
@@ -230,6 +231,9 @@ valkey:
 The chart generates a random password stored in a Kubernetes Secret and
 configures both Valkey (ACL) and SearXNG (`SEARXNG_REDIS_URL` env var)
 to use it. The password is preserved across `helm upgrade`.
+
+> **Note:** Replace `searxng` in Secret names with your Helm release name
+> (e.g., `my-release-searxng-valkey-auth`).
 
 ### External Valkey
 
@@ -347,7 +351,7 @@ Here are the values which can be modified in the installation:
 | `valkey.auth.enabled` | bool | `false` | Enable Valkey password authentication |
 | `valkey.auth.existingSecret` | string | `""` | Existing Secret with Valkey password |
 | `valkey.auth.key` | string | `"valkey-password"` | Key within the auth Secret |
-| `valkey.tls.enabled` | bool | `true` | Enable TLS for Valkey connections |
+| `valkey.tls.enabled` | bool | `false` | Enable TLS for Valkey connections |
 | `valkey.tls.existingSecret` | string | `""` | TLS Secret name (REQUIRED when tls.enabled in internal mode: `<release>-searxng-valkey-tls`) |
 | `valkey.tls.certManager.create` | bool | `true` | Create cert-manager Certificate and Issuer resources |
 | `valkey.tls.certManager.issuerRef.name` | string | `""` | cert-manager Issuer name (empty = self-signed) |

@@ -386,7 +386,7 @@ valkey:
   # TLS encryption configuration (applies to both internal and external modes)
   tls:
     # Enable TLS encryption for the Valkey connection
-    enabled: true
+    enabled: false
     # Name of an existing Secret containing TLS certificates
     # For external mode: user must provide this Secret (with ca.crt, tls.crt, tls.key)
     # For internal mode with cert-manager: set to "<release-name>-searxng-valkey-tls"

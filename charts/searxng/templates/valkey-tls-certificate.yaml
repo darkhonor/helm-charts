@@ -1,3 +1,8 @@
+# Filename: valkey-tls-certificate.yaml
+# Last Modified: 2026-03-07
+# Summary: cert-manager Certificate for Valkey TLS with RSA-4096 private key
+# Compliant With: DoD STIG, NIST SP800-53 Rev 5
+# Classification: UNCLASSIFIED
 {{- if and .Values.valkey.tls.enabled (eq .Values.valkey.mode "internal") .Values.valkey.tls.certManager.create }}
 {{- $fullname := include "searxng.fullname" . }}
 {{- $namespace := include "searxng.namespace" . }}
@@ -12,6 +17,9 @@ spec:
   secretName: {{ include "searxng.valkeyTlsSecretName" . }}
   duration: 8760h
   renewBefore: 720h
+  privateKey:
+    algorithm: RSA
+    size: 4096
   issuerRef:
     {{- if .Values.valkey.tls.certManager.issuerRef.name }}
     name: {{ .Values.valkey.tls.certManager.issuerRef.name }}

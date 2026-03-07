@@ -81,6 +81,10 @@ spec:
                   name: {{ include "searxng.valkeyAuthSecretName" . }}
                   key: {{ .Values.valkey.auth.key }}
           {{- end }}
+          {{- if .Values.valkey.tls.enabled }}
+            - name: SSL_CERT_FILE
+              value: "/etc/ssl/valkey/ca.crt"
+          {{- end }}
             - name: SEARXNG_REDIS_URL
               value: {{ include "searxng.redisURL" . | quote }}
           {{- with .Values.extraEnv }}
