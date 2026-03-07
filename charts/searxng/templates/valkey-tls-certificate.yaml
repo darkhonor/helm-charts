@@ -1,4 +1,4 @@
-{{- if and .Values.valkey.tls.enabled (eq .Values.valkey.mode "internal") (not .Values.valkey.tls.existingSecret) }}
+{{- if and .Values.valkey.tls.enabled (eq .Values.valkey.mode "internal") .Values.valkey.tls.certManager.create }}
 {{- $fullname := include "searxng.fullname" . }}
 {{- $namespace := include "searxng.namespace" . }}
 apiVersion: cert-manager.io/v1

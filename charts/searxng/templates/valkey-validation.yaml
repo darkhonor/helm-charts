@@ -1,0 +1,25 @@
+# Filename: valkey-validation.yaml
+# Last Modified: 2026-03-07
+# Summary: Validation guards for Valkey auth and TLS configuration
+# Compliant With: DoD STIG, NIST SP800-53 Rev 5
+# Classification: UNCLASSIFIED
+
+{{/* Guard 1: usersExistingSecret required when auth enabled in internal mode */}}
+{{- if and (eq .Values.valkey.mode "internal") .Values.valkey.auth.enabled (not .Values.valkey.auth.usersExistingSecret) }}
+{{- fail "valkey.auth.usersExistingSecret is required when valkey.auth.enabled is true in internal mode. Set it to the name of the Secret containing the Valkey password (e.g., '<release-name>-searxng-valkey-auth' for chart-generated passwords, or the same value as valkey.auth.existingSecret)." }}
+{{- end }}
+
+{{/* Guard 2: tls.existingSecret required when TLS enabled in internal mode */}}
+{{- if and (eq .Values.valkey.mode "internal") .Values.valkey.tls.enabled (not .Values.valkey.tls.existingSecret) }}
+{{- fail "valkey.tls.existingSecret is required when valkey.tls.enabled is true in internal mode. For cert-manager auto-generated certificates, set it to '<release-name>-searxng-valkey-tls'. The chart creates a cert-manager Certificate that populates this Secret automatically." }}
+{{- end }}
+
+{{/* Guard 3: valkey.enabled must be false when mode is external */}}
+{{- if and (eq .Values.valkey.mode "external") .Values.valkey.enabled }}
+{{- fail "valkey.enabled must be set to false when valkey.mode is 'external'. The bundled subchart should not deploy when using an external Valkey server." }}
+{{- end }}
+
+{{/* Guard 4: external host required when mode is external */}}
+{{- if and (eq .Values.valkey.mode "external") (not .Values.valkey.external.host) }}
+{{- fail "valkey.external.host is required when valkey.mode is 'external'." }}
+{{- end }}

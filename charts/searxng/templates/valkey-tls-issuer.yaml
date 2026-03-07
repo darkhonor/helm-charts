@@ -1,4 +1,4 @@
-{{- if and .Values.valkey.tls.enabled (eq .Values.valkey.mode "internal") (not .Values.valkey.tls.existingSecret) (not .Values.valkey.tls.certManager.issuerRef.name) }}
+{{- if and .Values.valkey.tls.enabled (eq .Values.valkey.mode "internal") .Values.valkey.tls.certManager.create (not .Values.valkey.tls.certManager.issuerRef.name) }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:

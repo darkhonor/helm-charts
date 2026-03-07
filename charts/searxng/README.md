@@ -205,6 +205,8 @@ valkey:
   mode: "internal"
   tls:
     enabled: true  # Default — auto-generates certs via cert-manager
+    # REQUIRED: set to "<release-name>-searxng-valkey-tls"
+    existingSecret: "searxng-valkey-tls"
 ```
 
 ### Internal Valkey with Authentication
@@ -221,6 +223,8 @@ valkey:
     usersExistingSecret: "searxng-valkey-auth"
   tls:
     enabled: true
+    # REQUIRED: set to "<release-name>-searxng-valkey-tls"
+    existingSecret: "searxng-valkey-tls"
 ```
 
 The chart generates a random password stored in a Kubernetes Secret and
@@ -234,6 +238,7 @@ Connect to an existing Valkey/Redis server:
 ```yaml
 valkey:
   mode: "external"
+  enabled: false  # REQUIRED: disable subchart in external mode
   external:
     host: "redis.example.com"
     port: 6379
@@ -248,6 +253,7 @@ valkey:
 ```
 
 When using external mode, the bundled Valkey subchart is not deployed.
+You must set `valkey.enabled: false` to prevent the subchart from deploying.
 You must provide:
 - An existing Secret with the password (referenced by `auth.existingSecret`)
 - An existing Secret with TLS certificates (`ca.crt`, `tls.crt`, `tls.key`)
@@ -259,6 +265,7 @@ For external Valkey with VSO-managed credentials:
 ```yaml
 valkey:
   mode: "external"
+  enabled: false  # REQUIRED: disable subchart in external mode
   external:
     host: "redis.prod.internal"
     port: 6379
@@ -332,6 +339,7 @@ Here are the values which can be modified in the installation:
 | `secrets.searxngSecret.existingSecret` | string | `""` | Name of an existing Secret to use |
 | `secrets.searxngSecret.key` | string | `"secret-key"` | Key within the Secret |
 | `secrets.searxngSecret.value` | string | `""` | Secret value (empty = auto-generate) |
+| `valkey.enabled` | bool | `true` | Deploy bundled Valkey subchart (set to `false` when mode: external) |
 | `valkey.mode` | string | `"internal"` | Valkey mode: `internal` (subchart) or `external` |
 | `valkey.external.host` | string | `""` | External Valkey hostname (required when mode: external) |
 | `valkey.external.port` | int | `6379` | External Valkey port |
@@ -340,7 +348,8 @@ Here are the values which can be modified in the installation:
 | `valkey.auth.existingSecret` | string | `""` | Existing Secret with Valkey password |
 | `valkey.auth.key` | string | `"valkey-password"` | Key within the auth Secret |
 | `valkey.tls.enabled` | bool | `true` | Enable TLS for Valkey connections |
-| `valkey.tls.existingSecret` | string | `""` | Existing Secret with TLS certs |
+| `valkey.tls.existingSecret` | string | `""` | TLS Secret name (REQUIRED when tls.enabled in internal mode: `<release>-searxng-valkey-tls`) |
+| `valkey.tls.certManager.create` | bool | `true` | Create cert-manager Certificate and Issuer resources |
 | `valkey.tls.certManager.issuerRef.name` | string | `""` | cert-manager Issuer name (empty = self-signed) |
 | `extraEnv` | list | `[]` | Extra environment variables |
 | `extraEnvFrom` | list | `[]` | Extra envFrom sources |

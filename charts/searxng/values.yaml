@@ -344,6 +344,8 @@ config:
       offload-threads = 4
 
 valkey:
+  # Deploy the bundled Valkey subchart (set to false when mode: external)
+  enabled: true
   # "internal" deploys the bundled Valkey subchart
   # "external" connects to an existing Valkey server (subchart disabled)
   mode: "internal"
@@ -387,10 +389,14 @@ valkey:
     enabled: true
     # Name of an existing Secret containing TLS certificates
     # For external mode: user must provide this Secret (with ca.crt, tls.crt, tls.key)
-    # For internal mode: leave empty to auto-generate via cert-manager
+    # For internal mode with cert-manager: set to "<release-name>-searxng-valkey-tls"
+    # REQUIRED when tls.enabled is true in internal mode.
     existingSecret: ""
-    # cert-manager configuration (internal mode only, ignored when existingSecret is set)
+    # cert-manager configuration (internal mode only)
     certManager:
+      # Create cert-manager Certificate and (optionally) self-signed Issuer
+      # Set to false if you provide your own TLS Secret without cert-manager
+      create: true
       issuerRef:
         # Name of the Issuer/ClusterIssuer to use
         # Leave empty to create a self-signed Issuer automatically
