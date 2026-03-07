@@ -46,8 +46,11 @@ jobs:
             if [[ -f "$chart" ]]; then
               APP_VERSION=$(yq e '.appVersion' "$chart" | tr -d '"')
               if [[ -n "$APP_VERSION" && "$APP_VERSION" != "null" ]]; then
-                echo "Updating $chart: version -> $APP_VERSION"
-                yq e -i ".version = \"$APP_VERSION\"" "$chart"
+                # Strip commit hash suffix (e.g. 2026.3.6-0716de6bc -> 2026.3.6)
+                # to produce valid SemVer for Helm. appVersion keeps the full tag.
+                CHART_VERSION=$(echo "$APP_VERSION" | sed 's/-[a-f0-9]\{7,\}$//')
+                echo "Updating $chart: version -> $CHART_VERSION (from appVersion $APP_VERSION)"
+                yq e -i ".version = \"$CHART_VERSION\"" "$chart"
               fi
             fi
           done
