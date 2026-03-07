@@ -70,6 +70,18 @@ spec:
               value: https://{{ .Values.httproute.hostname | quote }}
             - name: SEARXNG_HOSTNAME
               value: {{ .Values.httproute.hostname | quote }}
+            - name: SEARXNG_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "searxng.secretName" . }}
+                  key: {{ .Values.secrets.searxngSecret.key }}
+          {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
