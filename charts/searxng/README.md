@@ -58,12 +58,138 @@ If you manage secrets externally, reference an existing Secret:
 secrets:
   searxngSecret:
     create: false
-    existingSecret: "my-searxng-secret"
+    existingSecret: "searxng-secret"
     key: "secret-key"
 ```
 
 The chart injects the secret as the `SEARXNG_SECRET` environment variable, which
 overrides `server.secret_key` in `settings.yml` at runtime.
+
+### Vault Secrets Operator (VSO) Example
+
+For DoD/enterprise environments using HashiCorp Vault with the
+[Vault Secrets Operator](https://developer.hashicorp.com/vault/docs/platform/k8s/vso),
+the following manifests create the full secret injection pipeline.
+
+**Prerequisites:**
+- Vault Secrets Operator installed in the cluster
+- A `VaultConnection` resource configured (typically in the `vault` namespace)
+- A KV-v2 secrets engine mounted in Vault (e.g., `StaticSecrets`)
+- The SearXNG secret stored in Vault (e.g., `StaticSecrets/searxng`)
+
+#### 1. Namespace-Scoped VaultAuth with RBAC
+
+If your cluster uses a global `VaultAuth` in the `vault` namespace, you can skip
+this step and reference it directly (e.g., `vaultAuthRef: vault/vault-auth`).
+
+For namespace-scoped authentication:
+
+```yaml
+---
+# ServiceAccount for Vault authentication
+# [NIST IA-5] Authenticator management
+# [NIST AC-6] Least privilege
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-auth
+  namespace: searxng
+  labels:
+    app.kubernetes.io/name: searxng
+    app.kubernetes.io/component: vault-auth
+automountServiceAccountToken: true
+---
+# Long-lived service account token (required for RKE2 1.24+)
+# [NIST IA-5] Authenticator management
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vault-auth-token
+  namespace: searxng
+  labels:
+    app.kubernetes.io/name: searxng
+    app.kubernetes.io/component: vault-auth
+  annotations:
+    kubernetes.io/service-account.name: vault-auth
+type: kubernetes.io/service-account-token
+---
+# ClusterRoleBinding to allow token review for Vault auth
+# [NIST AC-6] Least privilege — scoped to the vault-auth SA only
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: searxng-vault-auth-delegator
+  labels:
+    app.kubernetes.io/name: searxng
+    app.kubernetes.io/component: vault-auth
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: vault-auth
+    namespace: searxng
+---
+# Namespace-scoped VaultAuth
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: searxng-vault-auth
+  namespace: searxng
+spec:
+  kubernetes:
+    role: vault-secrets-operator
+    serviceAccount: vault-auth
+    audiences:
+      - vault
+  vaultConnectionRef: vault/vault-connection  # Adjust to your VaultConnection name
+```
+
+#### 2. VaultStaticSecret
+
+```yaml
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: searxng-secret
+  namespace: searxng
+  labels:
+    app.kubernetes.io/name: searxng
+    app.kubernetes.io/component: secrets
+    app.kubernetes.io/managed-by: vault-secrets-operator
+spec:
+  type: kv-v2
+  mount: StaticSecrets
+  path: searxng
+  destination:
+    name: searxng-secret  # Must match secrets.searxngSecret.existingSecret
+    create: true
+  refreshAfter: 60s
+  vaultAuthRef: vault/vault-auth  # Or searxng/searxng-vault-auth for namespace-scoped
+  rolloutRestartTargets:
+    - kind: Deployment
+      name: searxng
+```
+
+#### 3. Helm Values
+
+```yaml
+secrets:
+  searxngSecret:
+    create: false
+    existingSecret: "searxng-secret"
+    key: "secret-key"  # Must match the key name in Vault's KV path
+```
+
+#### Vault CLI Setup
+
+Store the secret in Vault before deploying:
+
+```shell
+vault kv put StaticSecrets/searxng secret-key="$(openssl rand -hex 32)"
+```
 
 ## Environment Variables
 
