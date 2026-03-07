@@ -52,6 +52,16 @@ jobs:
             fi
           done
 
+      - name: Commit synced Chart.yaml files
+        run: |
+          if git diff --quiet; then
+            echo "No Chart.yaml changes to commit"
+          else
+            git add charts/*/Chart.yaml
+            git commit -m "chore: sync Chart.yaml versions from image tags [skip ci]"
+            git push
+          fi
+
       - name: Add repositories and update dependencies
         run: |
           for dir in $(ls -d charts/*/); do
