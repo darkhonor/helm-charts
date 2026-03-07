@@ -60,8 +60,8 @@ spec:
           port: 53
         - protocol: UDP
           port: 53
-    {{- if .Values.valkey.enabled }}
-    # Valkey/Redis connection (in same namespace)
+    {{- if eq .Values.valkey.mode "internal" }}
+    # Internal Valkey (subchart in same namespace)
     - to:
         - podSelector:
             matchLabels:
@@ -70,13 +70,15 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
-    {{- else if .Values.networkPolicy.externalValkey }}
-    # External Valkey (if using external Redis)
+    {{- else if eq .Values.valkey.mode "external" }}
+    # External Valkey server
+    {{- if .Values.networkPolicy.externalValkey }}
     - to:
         {{- toYaml .Values.networkPolicy.externalValkey | nindent 8 }}
       ports:
         - protocol: TCP
-          port: 6379
+          port: {{ .Values.valkey.external.port | default 6379 }}
+    {{- end }}
     {{- end }}
     {{- if .Values.networkPolicy.allowExternalEgress }}
     # Allow egress to external IPs (search engines on the internet)
