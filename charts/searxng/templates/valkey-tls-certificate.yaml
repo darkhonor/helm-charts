@@ -1,0 +1,26 @@
+{{- if and .Values.valkey.tls.enabled (eq .Values.valkey.mode "internal") (not .Values.valkey.tls.existingSecret) }}
+{{- $fullname := include "searxng.fullname" . }}
+{{- $namespace := include "searxng.namespace" . }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $fullname }}-valkey-tls
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "searxng.valkeyTlsSecretName" . }}
+  duration: 8760h
+  renewBefore: 720h
+  issuerRef:
+    {{- if .Values.valkey.tls.certManager.issuerRef.name }}
+    name: {{ .Values.valkey.tls.certManager.issuerRef.name }}
+    {{- else }}
+    name: {{ $fullname }}-valkey-selfsigned
+    {{- end }}
+    kind: {{ .Values.valkey.tls.certManager.issuerRef.kind }}
+  dnsNames:
+    - {{ $fullname }}-valkey
+    - {{ $fullname }}-valkey.{{ $namespace }}.svc
+    - {{ $fullname }}-valkey.{{ $namespace }}.svc.cluster.local
+{{- end }}
