@@ -134,9 +134,9 @@ Determine the URL scheme based on TLS setting.
 */}}
 {{- define "searxng.valkeyScheme" -}}
 {{- if .Values.valkey.tls.enabled -}}
-  {{- "rediss" -}}
+  {{- "valkeys" -}}
 {{- else -}}
-  {{- "redis" -}}
+  {{- "valkey" -}}
 {{- end -}}
 {{- end -}}
 
