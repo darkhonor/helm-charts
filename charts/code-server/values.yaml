@@ -204,7 +204,7 @@ lifecycle:
   #           && sudo apt-get install -y docker.io
 
 ## Enable an Specify container in extraContainers.
-## This is meant to allow adding code-server dependencies, like docker-dind.
+## This is meant to allow adding code-server dependencies, like docker-dind.
 extraContainers: |
 # If docker-dind is used, DOCKER_HOST env is mandatory to set in "extraVars"
 # - name: docker-dind
