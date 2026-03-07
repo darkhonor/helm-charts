@@ -191,6 +191,105 @@ Store the secret in Vault before deploying:
 vault kv put StaticSecrets/searxng secret-key="$(openssl rand -hex 32)"
 ```
 
+## Valkey Configuration
+
+The chart supports three Valkey deployment modes:
+
+### Internal Valkey (Default)
+
+The chart deploys a bundled Valkey instance via subchart. By default, TLS is
+enabled via a self-signed cert-manager Certificate.
+
+```yaml
+valkey:
+  mode: "internal"
+  tls:
+    enabled: true  # Default — auto-generates certs via cert-manager
+```
+
+### Internal Valkey with Authentication
+
+Enable password authentication for the bundled Valkey instance:
+
+```yaml
+valkey:
+  mode: "internal"
+  auth:
+    enabled: true
+    # usersExistingSecret must match the generated Secret name:
+    # <release-name>-searxng-valkey-auth
+    usersExistingSecret: "searxng-valkey-auth"
+  tls:
+    enabled: true
+```
+
+The chart generates a random password stored in a Kubernetes Secret and
+configures both Valkey (ACL) and SearXNG (`SEARXNG_REDIS_URL` env var)
+to use it. The password is preserved across `helm upgrade`.
+
+### External Valkey
+
+Connect to an existing Valkey/Redis server:
+
+```yaml
+valkey:
+  mode: "external"
+  external:
+    host: "redis.example.com"
+    port: 6379
+    db: 0
+  auth:
+    enabled: true
+    existingSecret: "my-redis-password"
+    key: "password"
+  tls:
+    enabled: true
+    existingSecret: "my-redis-tls"
+```
+
+When using external mode, the bundled Valkey subchart is not deployed.
+You must provide:
+- An existing Secret with the password (referenced by `auth.existingSecret`)
+- An existing Secret with TLS certificates (`ca.crt`, `tls.crt`, `tls.key`)
+
+### Valkey VSO Example
+
+For external Valkey with VSO-managed credentials:
+
+```yaml
+valkey:
+  mode: "external"
+  external:
+    host: "redis.prod.internal"
+    port: 6379
+    db: 0
+  auth:
+    enabled: true
+    existingSecret: "valkey-auth-secret"
+    key: "password"
+  tls:
+    enabled: true
+    existingSecret: "valkey-tls-certs"
+```
+
+Create the VaultStaticSecret to sync the password:
+
+```yaml
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: valkey-auth-secret
+spec:
+  type: kv-v2
+  mount: StaticSecrets
+  path: valkey
+  destination:
+    name: valkey-auth-secret
+    create: true
+  refreshAfter: 60s
+  vaultAuthRef: vault/vault-auth
+```
+
 ## Environment Variables
 
 ### Extra Environment Variables
@@ -233,6 +332,16 @@ Here are the values which can be modified in the installation:
 | `secrets.searxngSecret.existingSecret` | string | `""` | Name of an existing Secret to use |
 | `secrets.searxngSecret.key` | string | `"secret-key"` | Key within the Secret |
 | `secrets.searxngSecret.value` | string | `""` | Secret value (empty = auto-generate) |
+| `valkey.mode` | string | `"internal"` | Valkey mode: `internal` (subchart) or `external` |
+| `valkey.external.host` | string | `""` | External Valkey hostname (required when mode: external) |
+| `valkey.external.port` | int | `6379` | External Valkey port |
+| `valkey.external.db` | int | `0` | External Valkey database number |
+| `valkey.auth.enabled` | bool | `false` | Enable Valkey password authentication |
+| `valkey.auth.existingSecret` | string | `""` | Existing Secret with Valkey password |
+| `valkey.auth.key` | string | `"valkey-password"` | Key within the auth Secret |
+| `valkey.tls.enabled` | bool | `true` | Enable TLS for Valkey connections |
+| `valkey.tls.existingSecret` | string | `""` | Existing Secret with TLS certs |
+| `valkey.tls.certManager.issuerRef.name` | string | `""` | cert-manager Issuer name (empty = self-signed) |
 | `extraEnv` | list | `[]` | Extra environment variables |
 | `extraEnvFrom` | list | `[]` | Extra envFrom sources |
 
