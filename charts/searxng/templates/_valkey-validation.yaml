@@ -1,0 +1,9 @@
+# Filename: _valkey-validation.yaml
+# Last Modified: 2026-03-07
+# Summary: Validation guards for Valkey auth and TLS configuration
+# Compliant With: DoD STIG, NIST SP800-53 Rev 5
+# Classification: UNCLASSIFIED
+
+{{- if and (eq .Values.valkey.mode "internal") .Values.valkey.auth.enabled (not .Values.valkey.auth.usersExistingSecret) }}
+{{- fail "valkey.auth.usersExistingSecret is required when valkey.auth.enabled is true in internal mode. Set it to the name of the Secret containing the Valkey password (e.g., '<release-name>-searxng-valkey-auth' for chart-generated passwords, or the same value as valkey.auth.existingSecret)." }}
+{{- end }}

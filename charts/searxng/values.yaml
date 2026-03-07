@@ -371,9 +371,10 @@ valkey:
     key: "valkey-password"
     # --- Valkey subchart ACL passthrough (internal mode only) ---
     # When auth.enabled is true, these configure the Valkey subchart's ACL system.
-    # usersExistingSecret must match the Secret that holds the password.
-    # For chart-generated passwords: set to "<release-name>-searxng-valkey-auth"
-    # For existingSecret: set to the same value as auth.existingSecret
+    # REQUIRED when auth.enabled is true:
+    # usersExistingSecret must be set to the Secret name containing the password.
+    #   Chart-generated: "<release-name>-searxng-valkey-auth"
+    #   Existing secret: same value as auth.existingSecret
     usersExistingSecret: ""
     aclUsers:
       default:
