@@ -278,8 +278,8 @@ config:
         center_alignment: false
         cache_url: https://web.archive.org/web/
 
-      valkey:
-        url: valkey://searxng-valkey:6379/0
+      # Valkey URL is injected via SEARXNG_REDIS_URL env var
+      # Do NOT set valkey.url here — it would expose auth credentials in a ConfigMap
 
   # Configure according to https://docs.searxng.org/admin/searx.limiter.html
   limiter:
@@ -344,6 +344,50 @@ config:
       offload-threads = 4
 
 valkey:
+  # "internal" deploys the bundled Valkey subchart
+  # "external" connects to an existing Valkey server (subchart disabled)
+  mode: "internal"
+
+  # External Valkey connection settings (only used when mode: external)
+  external:
+    # Hostname or IP of the external Valkey server (required when mode: external)
+    host: ""
+    # Port of the external Valkey server
+    port: 6379
+    # Database number to use
+    db: 0
+
+  # Authentication configuration (applies to both internal and external modes)
+  auth:
+    # Enable password authentication
+    enabled: false
+    # Password value — leave empty to auto-generate (internal mode only)
+    # Ignored when existingSecret is set
+    password: ""
+    # Use an existing Secret instead of chart-generated
+    # The Secret must contain a key matching the 'key' field below
+    existingSecret: ""
+    # Key within the Secret containing the Valkey password
+    key: "valkey-password"
+
+  # TLS encryption configuration (applies to both internal and external modes)
+  tls:
+    # Enable TLS encryption for the Valkey connection
+    enabled: true
+    # Name of an existing Secret containing TLS certificates
+    # For external mode: user must provide this Secret (with ca.crt, tls.crt, tls.key)
+    # For internal mode: leave empty to auto-generate via cert-manager
+    existingSecret: ""
+    # cert-manager configuration (internal mode only, ignored when existingSecret is set)
+    certManager:
+      issuerRef:
+        # Name of the Issuer/ClusterIssuer to use
+        # Leave empty to create a self-signed Issuer automatically
+        name: ""
+        # Kind of the issuer: Issuer or ClusterIssuer
+        kind: "Issuer"
+
+  # --- Subchart passthrough values (apply only when mode: internal) ---
   podSecurityContext:
     runAsNonRoot: true
     runAsUser: 1000
