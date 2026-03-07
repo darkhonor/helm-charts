@@ -19,6 +19,11 @@
       "platformAutomerge": true
     },
     {
+      "description": "SearXNG uses date-based tags (YYYY.M.D-commithash)",
+      "matchPackageNames": ["ghcr.io/searxng/searxng"],
+      "versioning": "regex:^(?<major>\\d{4})\\.(?<minor>\\d{1,2})\\.(?<patch>\\d{1,2})-[a-f0-9]+$"
+    },
+    {
       "description": "Require manual review for major version bumps",
       "matchUpdateTypes": ["major"],
       "automerge": false,
