@@ -212,6 +212,8 @@ secrets:
     key: "secret-key"
     # Value for secret_key when create: true (ignored if existingSecret is set)
     # If empty and create is true, a random 64-character hex string is generated
+    # Note: The chart reuses the existing secret value across upgrades to prevent
+    # session invalidation. Set an explicit value or use existingSecret for full control.
     value: ""
 
 # Extra environment variables for the SearXNG container
