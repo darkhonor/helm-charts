@@ -1,0 +1,11 @@
+{{- if and .Values.valkey.tls.enabled (eq .Values.valkey.mode "internal") (not .Values.valkey.tls.existingSecret) (not .Values.valkey.tls.certManager.issuerRef.name) }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "searxng.fullname" . }}-valkey-selfsigned
+  namespace: {{ include "searxng.namespace" . }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+{{- end }}
