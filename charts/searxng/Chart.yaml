@@ -3,14 +3,14 @@ name: searxng
 description: SearXNG is a free internet metasearch engine
 home: https://docs.searxng.org
 type: application
-version: 2025.9.29-77fd3ee53
-appVersion: "2025.9.29-77fd3ee53"
+version: 2026.3.6
+appVersion: "2026.3.6-0716de6bc"
 keywords:
-- searxng
-- search
-- metasearch
-- kubernetes
-- privacy
+  - searxng
+  - search
+  - metasearch
+  - kubernetes
+  - privacy
 sources:
   - https://github.com/darkhonor/helm-charts
   - https://github.com/searxng/searxng
