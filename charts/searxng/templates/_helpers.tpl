@@ -83,3 +83,100 @@ Uses existingSecret if set, otherwise generates name from fullname.
   {{- printf "%s-secret" (include "searxng.fullname" .) -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Determine if the internal Valkey subchart should be deployed.
+*/}}
+{{- define "searxng.valkeyEnabled" -}}
+{{- if eq .Values.valkey.mode "internal" -}}
+true
+{{- else -}}
+false
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve the Valkey hostname based on mode.
+Internal: subchart service name. External: user-provided host.
+*/}}
+{{- define "searxng.valkeyHost" -}}
+{{- if eq .Values.valkey.mode "internal" -}}
+  {{- printf "%s-valkey.%s.svc.cluster.local" (include "searxng.fullname" .) (include "searxng.namespace" .) -}}
+{{- else -}}
+  {{- required "valkey.external.host is required when valkey.mode is external" .Values.valkey.external.host -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve the Valkey port based on mode.
+*/}}
+{{- define "searxng.valkeyPort" -}}
+{{- if eq .Values.valkey.mode "internal" -}}
+  {{- 6379 -}}
+{{- else -}}
+  {{- .Values.valkey.external.port | default 6379 -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve the Valkey database number based on mode.
+*/}}
+{{- define "searxng.valkeyDB" -}}
+{{- if eq .Values.valkey.mode "internal" -}}
+  {{- 0 -}}
+{{- else -}}
+  {{- .Values.valkey.external.db | default 0 -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Determine the URL scheme based on TLS setting.
+*/}}
+{{- define "searxng.valkeyScheme" -}}
+{{- if .Values.valkey.tls.enabled -}}
+  {{- "rediss" -}}
+{{- else -}}
+  {{- "redis" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve the Valkey auth Secret name.
+Uses existingSecret if set, otherwise generates from fullname.
+*/}}
+{{- define "searxng.valkeyAuthSecretName" -}}
+{{- if .Values.valkey.auth.existingSecret -}}
+  {{- .Values.valkey.auth.existingSecret -}}
+{{- else -}}
+  {{- printf "%s-valkey-auth" (include "searxng.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve the Valkey TLS Secret name.
+Uses existingSecret if set, otherwise generates from fullname.
+*/}}
+{{- define "searxng.valkeyTlsSecretName" -}}
+{{- if .Values.valkey.tls.existingSecret -}}
+  {{- .Values.valkey.tls.existingSecret -}}
+{{- else -}}
+  {{- printf "%s-valkey-tls" (include "searxng.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Build the full SEARXNG_REDIS_URL.
+When auth is enabled, uses $(VALKEY_PASSWORD) for Kubernetes dependent env var
+resolution at container start.
+*/}}
+{{- define "searxng.redisURL" -}}
+{{- $scheme := include "searxng.valkeyScheme" . -}}
+{{- $host := include "searxng.valkeyHost" . -}}
+{{- $port := include "searxng.valkeyPort" . -}}
+{{- $db := include "searxng.valkeyDB" . -}}
+{{- if .Values.valkey.auth.enabled -}}
+  {{- printf "%s://:$(VALKEY_PASSWORD)@%s:%s/%s" $scheme $host $port $db -}}
+{{- else -}}
+  {{- printf "%s://%s:%s/%s" $scheme $host $port $db -}}
+{{- end -}}
+{{- end -}}
