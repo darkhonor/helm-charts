@@ -74,6 +74,15 @@ spec:
                 secretKeyRef:
                   name: {{ include "searxng.secretName" . }}
                   key: {{ .Values.secrets.searxngSecret.key }}
+          {{- if .Values.valkey.auth.enabled }}
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "searxng.valkeyAuthSecretName" . }}
+                  key: {{ .Values.valkey.auth.key }}
+          {{- end }}
+            - name: SEARXNG_REDIS_URL
+              value: {{ include "searxng.redisURL" . | quote }}
           {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -114,6 +123,12 @@ spec:
           {{- end }}
             - mountPath: /tmp
               name: searxng-tmp
+          {{- if .Values.valkey.tls.enabled }}
+            - name: valkey-tls-ca
+              mountPath: /etc/ssl/valkey/ca.crt
+              subPath: ca.crt
+              readOnly: true
+          {{- end }}
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -135,6 +150,14 @@ spec:
       {{- end }}
         - name: searxng-tmp
           emptyDir: {}
+      {{- if .Values.valkey.tls.enabled }}
+        - name: valkey-tls-ca
+          secret:
+            secretName: {{ include "searxng.valkeyTlsSecretName" . }}
+            items:
+              - key: ca.crt
+                path: ca.crt
+      {{- end }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
