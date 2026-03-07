@@ -198,6 +198,40 @@ tolerations: []
 
 affinity: {}
 
+# Secrets management for sensitive SearXNG configuration values
+# For the full list of environment variables SearXNG supports, see:
+# https://docs.searxng.org/admin/settings/index.html
+secrets:
+  searxngSecret:
+    # If true, the chart creates a Kubernetes Secret with the secret_key value
+    create: true
+    # Name of an existing Secret to use instead of creating one
+    # When set with create: false, the chart references this Secret
+    existingSecret: ""
+    # Key within the Secret that holds the secret_key value
+    key: "secret-key"
+    # Value for secret_key when create: true (ignored if existingSecret is set)
+    # If empty and create is true, a random 64-character hex string is generated
+    value: ""
+
+# Extra environment variables for the SearXNG container
+# Ref: https://docs.searxng.org/admin/settings/index.html
+extraEnv: []
+# - name: SEARXNG_BASE_URL
+#   value: "https://search.example.com"
+# - name: MY_SECRET_VAR
+#   valueFrom:
+#     secretKeyRef:
+#       name: my-secret
+#       key: my-key
+
+# Extra envFrom sources to bulk-inject environment variables from Secrets or ConfigMaps
+extraEnvFrom: []
+# - secretRef:
+#     name: my-bulk-secret
+# - configMapRef:
+#     name: my-config
+
 config:
   # Configure the SearXNG Settings IAW https://docs.searxng.org/admin/settings/index.html
   settings:
@@ -208,7 +242,7 @@ config:
 
       # See https://docs.searxng.org/admin/settings/settings_server.html
       server:
-        secret_key: "changeme"  # REQUIRED: CHANGE THIS VALUE IN YOUR INSTANCE
+        secret_key: "changeme"  # Overridden at runtime by SEARXNG_SECRET env var from secrets.searxngSecret
         limiter: true  # enable this when running the instance for a public usage on the internet
         image_proxy: true
         public_instance: true
