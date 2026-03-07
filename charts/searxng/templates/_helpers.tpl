@@ -71,3 +71,15 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Determine the Secret name for SearXNG secret_key.
+Uses existingSecret if set, otherwise generates name from fullname.
+*/}}
+{{- define "searxng.secretName" -}}
+{{- if .Values.secrets.searxngSecret.existingSecret -}}
+  {{- .Values.secrets.searxngSecret.existingSecret -}}
+{{- else -}}
+  {{- printf "%s-secret" (include "searxng.fullname" .) -}}
+{{- end -}}
+{{- end -}}
