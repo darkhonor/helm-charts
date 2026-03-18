@@ -2,5 +2,5 @@ apiVersion: v2
 name: drawio
 description: A Helm chart for draw.io
 type: application
-version: 29.6.1
-appVersion: "29.6.1"
+version: 29.6.4
+appVersion: "29.6.4"
