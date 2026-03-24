@@ -53,6 +53,16 @@ entries:
     version: 4.108.0
   drawio:
   - apiVersion: v2
+    appVersion: 29.6.5
+    created: "2026-03-24T15:42:59.628259795Z"
+    description: A Helm chart for draw.io
+    digest: 9f8d2dcc2c5c9ebbf824faf0671433f13509f764d032ae23194fef72730d0195
+    name: drawio
+    type: application
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/drawio-29.6.5/drawio-29.6.5.tgz
+    version: 29.6.5
+  - apiVersion: v2
     appVersion: 29.6.4
     created: "2026-03-18T16:36:59.998251934Z"
     description: A Helm chart for draw.io
@@ -1405,4 +1415,4 @@ entries:
     urls:
     - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
     version: 2025.9.29-77fd3ee53
-generated: "2026-03-24T15:41:23.744671473Z"
+generated: "2026-03-24T15:42:59.628457915Z"
