@@ -3,8 +3,8 @@ name: searxng
 description: SearXNG is a free internet metasearch engine
 home: https://docs.searxng.org
 type: application
-version: 2026.3.18
-appVersion: "2026.3.18-3810dc9d1"
+version: 2026.3.24
+appVersion: "2026.3.24-f8056b5e4"
 keywords:
   - searxng
   - search
