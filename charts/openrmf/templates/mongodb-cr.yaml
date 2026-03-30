@@ -1,0 +1,67 @@
+{{- if eq .Values.mongodb.mode "operator" }}
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: {{ include "openrmf.fullname" . }}-mongodb
+  namespace: {{ include "openrmf.namespace" . }}
+  labels:
+    {{- include "openrmf.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+spec:
+  members: 1
+  type: ReplicaSet
+  version: {{ .Values.mongodb.operator.version | quote }}
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    {{- range .Values.mongodb.operator.databases }}
+    - name: {{ . }}
+      db: {{ . }}
+      passwordSecretRef:
+        name: {{ include "openrmf.fullname" $ }}-mongodb-{{ . }}
+      roles:
+        - name: readWrite
+          db: {{ . }}
+      scramCredentialsSecretName: {{ include "openrmf.fullname" $ }}-mongodb-scram-{{ . }}
+    {{- end }}
+  statefulSet:
+    spec:
+      template:
+        spec:
+          securityContext:
+            {{- toYaml $.Values.podSecurityContext | nindent 12 }}
+          containers:
+            - name: mongod
+              resources:
+                {{- toYaml $.Values.mongodb.operator.resources | nindent 16 }}
+            - name: mongodb-agent
+              resources:
+                limits:
+                  cpu: 250m
+                  memory: 256Mi
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+      volumeClaimTemplates:
+        - metadata:
+            name: data-volume
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            {{- if .Values.mongodb.operator.storage.storageClass }}
+            storageClassName: {{ .Values.mongodb.operator.storage.storageClass | quote }}
+            {{- end }}
+            resources:
+              requests:
+                storage: {{ .Values.mongodb.operator.storage.size }}
+        - metadata:
+            name: logs-volume
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            {{- if .Values.mongodb.operator.storage.storageClass }}
+            storageClassName: {{ .Values.mongodb.operator.storage.storageClass | quote }}
+            {{- end }}
+            resources:
+              requests:
+                storage: 2Gi
+{{- end }}
