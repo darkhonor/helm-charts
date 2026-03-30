@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openrmf.fullname" . }}-web-api
+  namespace: {{ include "openrmf.namespace" . }}
+  labels:
+    {{- include "openrmf.labels" . | nindent 4 }}
+data:
+  apiconfig.js: |
+    var readAPI = '/api/read/artifact/';
+    var scoreAPI = '/api/scoring/';
+    var saveAPI = '/api/read/save/';
+    var uploadAPI = '/api/read/upload/';
+    var templateAPI = '/api/template/';
+    var complianceAPI = '/api/read/compliance/';
+    var controlAPI = '/api/controls/';
+    var auditAPI = '/api/audit/';
+    var reportAPI = '/api/report/';
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openrmf.fullname" . }}-web-auth
+  namespace: {{ include "openrmf.namespace" . }}
+  labels:
+    {{- include "openrmf.labels" . | nindent 4 }}
+data:
+  auth.js: |
+    var defined_keycloak = new Keycloak({
+        url: '{{ include "openrmf.keycloakURL" . }}',
+        realm: '{{ include "openrmf.keycloakRealm" . }}',
+        clientId: 'openrmf'
+    });
