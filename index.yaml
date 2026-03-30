@@ -364,6 +364,42 @@ entries:
     urls:
     - https://github.com/darkhonor/helm-charts/releases/download/open-webui-0.6.43/open-webui-0.6.43.tgz
     version: 0.6.43
+  openrmf:
+  - annotations:
+      licenses: MIT
+    apiVersion: v2
+    appVersion: 1.14.00
+    created: "2026-03-30T09:57:54.769243197Z"
+    dependencies:
+    - condition: keycloak.internal.enabled
+      name: keycloakx
+      repository: https://codecentric.github.io/helm-charts
+      version: 7.1.9
+    - condition: mongodb.operator.enabled
+      name: community-operator
+      repository: https://mongodb.github.io/helm-charts
+      version: 0.13.0
+    description: OpenRMF OSS - DoD Risk Management Framework compliance tool for managing
+      STIGs, Nessus scans, and NIST RMF compliance. Hardened for STIG'd RKE2 with
+      Gateway API HTTPS and restricted Pod Security Standard.
+    digest: 966b598ba1037d13677e3b68366dadc0f5e1df4fb3e151048b63f8a6cf0c9b45
+    keywords:
+    - openrmf
+    - rmf
+    - stig
+    - nist
+    - compliance
+    - dod
+    maintainers:
+    - name: darkhonor
+      url: https://www.vmhomelab.org
+    name: openrmf
+    sources:
+    - https://github.com/Cingulara/openrmf-docs
+    type: application
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/openrmf-1.14.00/openrmf-1.14.00.tgz
+    version: 1.14.00
   searxng:
   - annotations:
       licenses: Apache-2.0
@@ -1415,4 +1451,4 @@ entries:
     urls:
     - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
     version: 2025.9.29-77fd3ee53
-generated: "2026-03-24T15:42:59.628457915Z"
+generated: "2026-03-30T09:57:54.76941453Z"
