@@ -1,0 +1,521 @@
+# Default values for openrmf.
+# Security-first defaults for STIG'd RKE2 with restricted PSS.
+
+# -- Override the release namespace
+namespaceOverride: ""
+
+# -- Number of replicas (applies to web frontend only; API/msg are 1 each)
+replicaCount: 1
+
+# -- Override chart name
+nameOverride: ""
+# -- Override fully qualified app name
+fullnameOverride: ""
+
+# ============================================================================
+# Service Account
+# ============================================================================
+serviceAccount:
+  create: true
+  automountServiceAccountToken: false
+  annotations: {}
+  name: ""
+
+# ============================================================================
+# Pod Metadata
+# ============================================================================
+podAnnotations: {}
+podLabels: {}
+
+# ============================================================================
+# Security Context (restricted PSS compliant)
+# ============================================================================
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroupChangePolicy: "OnRootMismatch"
+
+containerSecurityContext:
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+# ============================================================================
+# Container Images
+# ============================================================================
+images:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+  web:
+    repository: docker.io/cingulara/openrmf-web
+    tag: "1.14.00"
+  nats:
+    repository: docker.io/nats
+    tag: "2.11.11-alpine3.22"
+
+  api:
+    read:
+      repository: docker.io/cingulara/openrmf-api-read
+      tag: "1.14.00"
+    scoring:
+      repository: docker.io/cingulara/openrmf-api-scoring
+      tag: "1.14.00"
+    template:
+      repository: docker.io/cingulara/openrmf-api-template
+      tag: "1.14.00"
+    controls:
+      repository: docker.io/cingulara/openrmf-api-controls
+      tag: "1.14.00"
+    audit:
+      repository: docker.io/cingulara/openrmf-api-audit
+      tag: "1.14.00"
+    report:
+      repository: docker.io/cingulara/openrmf-api-report
+      tag: "1.14.00"
+
+  msg:
+    checklist:
+      repository: docker.io/cingulara/openrmf-msg-checklist
+      tag: "1.14.00"
+    score:
+      repository: docker.io/cingulara/openrmf-msg-score
+      tag: "1.14.00"
+    template:
+      repository: docker.io/cingulara/openrmf-msg-template
+      tag: "1.14.00"
+    controls:
+      repository: docker.io/cingulara/openrmf-msg-controls
+      tag: "1.14.00"
+    audit:
+      repository: docker.io/cingulara/openrmf-msg-audit
+      tag: "1.14.00"
+    report:
+      repository: docker.io/cingulara/openrmf-msg-report
+      tag: "1.14.00"
+    system:
+      repository: docker.io/cingulara/openrmf-msg-system
+      tag: "1.14.00"
+    compliance:
+      repository: docker.io/cingulara/openrmf-msg-compliance
+      tag: "1.14.00"
+
+# ============================================================================
+# API Services - each entry creates Deployment + Service via iterated templates
+# ============================================================================
+api:
+  services:
+    read:
+      port: 8084
+      dbConnectionKey: "checklist-uri"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 768Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+      livenessProbe:
+        httpGet:
+          path: /healthz
+          port: http
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+      readinessProbe:
+        tcpSocket:
+          port: http
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        timeoutSeconds: 3
+        failureThreshold: 3
+
+    scoring:
+      port: 8090
+      dbConnectionKey: "score-uri"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 768Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+      livenessProbe:
+        httpGet:
+          path: /healthz
+          port: http
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+      readinessProbe:
+        tcpSocket:
+          port: http
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        timeoutSeconds: 3
+        failureThreshold: 3
+
+    template:
+      port: 8088
+      dbConnectionKey: "template-uri"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 768Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+      livenessProbe:
+        httpGet:
+          path: /healthz
+          port: http
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+      readinessProbe:
+        tcpSocket:
+          port: http
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        timeoutSeconds: 3
+        failureThreshold: 3
+
+    controls:
+      port: 8094
+      dbConnectionKey: ""
+      resources:
+        limits:
+          cpu: 500m
+          memory: 768Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+      livenessProbe:
+        httpGet:
+          path: /healthz
+          port: http
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+      readinessProbe:
+        tcpSocket:
+          port: http
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        timeoutSeconds: 3
+        failureThreshold: 3
+
+    audit:
+      port: 8096
+      dbConnectionKey: "audit-uri"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 768Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+      livenessProbe:
+        httpGet:
+          path: /healthz
+          port: http
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+      readinessProbe:
+        tcpSocket:
+          port: http
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        timeoutSeconds: 3
+        failureThreshold: 3
+
+    report:
+      port: 8098
+      dbConnectionKey: "report-uri"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 768Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+      livenessProbe:
+        httpGet:
+          path: /healthz
+          port: http
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+      readinessProbe:
+        tcpSocket:
+          port: http
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        timeoutSeconds: 3
+        failureThreshold: 3
+
+# ============================================================================
+# Message Consumers - each entry creates Deployment (no Service)
+# ============================================================================
+msg:
+  consumers:
+    checklist:
+      dbConnectionKey: "checklist-uri"
+      resources:
+        limits:
+          cpu: 250m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+    score:
+      dbConnectionKey: "score-uri"
+      resources:
+        limits:
+          cpu: 250m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+    template:
+      dbConnectionKey: "template-uri"
+      resources:
+        limits:
+          cpu: 250m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+    controls:
+      dbConnectionKey: ""
+      resources:
+        limits:
+          cpu: 250m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+    audit:
+      dbConnectionKey: "audit-uri"
+      resources:
+        limits:
+          cpu: 250m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+    report:
+      dbConnectionKey: "report-uri"
+      resources:
+        limits:
+          cpu: 250m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+    system:
+      dbConnectionKey: "checklist-uri"
+      resources:
+        limits:
+          cpu: 250m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+    compliance:
+      dbConnectionKey: "checklist-uri"
+      resources:
+        limits:
+          cpu: 250m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+
+# ============================================================================
+# Web Frontend
+# ============================================================================
+web:
+  port: 8080
+  runAsUser: 101
+  runAsGroup: 101
+  fsGroup: 101
+  resources:
+    limits:
+      cpu: 500m
+      memory: 400Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  livenessProbe:
+    httpGet:
+      path: /status.html
+      port: http
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    tcpSocket:
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# ============================================================================
+# NATS
+# ============================================================================
+nats:
+  port: 4222
+  monitorPort: 8222
+  routePort: 6222
+  runAsUser: 1000
+  runAsGroup: 1000
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  auth:
+    enabled: false
+    existingSecret: ""
+    tokenKey: "nats-token"
+
+# ============================================================================
+# Keycloak (OIDC Identity Provider)
+# ============================================================================
+keycloak:
+  mode: "external"
+  external:
+    url: ""
+    realm: "openrmf"
+    existingSecret: ""
+    clientIdKey: "client-id"
+    clientSecretKey: "client-secret"
+  internal:
+    enabled: false
+    realm: "openrmf"
+  keycloakx: {}
+
+# ============================================================================
+# MongoDB
+# ============================================================================
+mongodb:
+  mode: "external"
+  external:
+    existingSecret: ""
+    checklistConnectionKey: "checklist-uri"
+    scoreConnectionKey: "score-uri"
+    templateConnectionKey: "template-uri"
+    auditConnectionKey: "audit-uri"
+    reportConnectionKey: "report-uri"
+  operator:
+    enabled: false
+    version: "7.0.26"
+    storage:
+      size: 10Gi
+      storageClass: ""
+    databases:
+      - openrmf
+      - openrmfscore
+      - openrmftemplate
+      - openrmfaudit
+      - openrmfreport
+    resources:
+      limits:
+        cpu: "1000m"
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 768Mi
+  community-operator: {}
+
+# ============================================================================
+# Gateway API & TLS
+# ============================================================================
+httproute:
+  enabled: true
+  annotations: {}
+  gateway:
+    enabled: true
+    class: "traefik"
+    listener:
+      protocol: "HTTPS"
+      port: 443
+  hostname: "openrmf.asan.darkhonor.net"
+  tls:
+    enabled: true
+    mode: "Terminate"
+    certificate:
+      generate: true
+      algorithm: RSA
+      keySize: 4096
+      duration: "2160h"
+      renewBefore: "360h"
+      organization: ""
+    issuer: "vault-issuer"
+    issuerKind: ClusterIssuer
+  extraLabels: {}
+
+# ============================================================================
+# Network Policy
+# ============================================================================
+networkPolicy:
+  enabled: true
+  gatewayNamespace: "kube-system"
+  gatewaySelector:
+    app.kubernetes.io/name: traefik
+  allowExternalHTTPS: false
+  externalMonitoring:
+    enabled: false
+    cidr: ""
+  additionalIngressSources: []
+  additionalEgressRules: []
+
+# ============================================================================
+# Monitoring
+# ============================================================================
+monitoring:
+  serviceMonitor:
+    enabled: false
+    interval: "15s"
+    matchLabels: {}
+  externalMetrics:
+    enabled: false
+    serviceType: ClusterIP
+    annotations: {}
+
+# ============================================================================
+# Persistence (guard clause: hostPath is PROHIBITED)
+# ============================================================================
+persistence:
+  hostPath: ""
+
+# ============================================================================
+# Scheduling
+# ============================================================================
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ============================================================================
+# Extra configuration escape hatches
+# ============================================================================
+extraEnv: []
+extraEnvFrom: []
+extraVolumeMounts: []
+extraVolumes: []
