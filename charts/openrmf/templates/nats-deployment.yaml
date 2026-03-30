@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openrmf.fullname" . }}-nats
+  namespace: {{ include "openrmf.namespace" . }}
+  labels:
+    {{- include "openrmf.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "openrmf.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: nats
+  template:
+    metadata:
+      labels:
+        {{- include "openrmf.labels" . | nindent 8 }}
+        app.kubernetes.io/component: nats
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "openrmf.serviceAccountName" . }}
+      automountServiceAccountToken: false
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        runAsUser: {{ .Values.nats.runAsUser }}
+        runAsGroup: {{ .Values.nats.runAsGroup }}
+        fsGroup: {{ .Values.nats.runAsGroup }}
+      {{- with .Values.images.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nats
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          image: "{{ .Values.images.nats.repository }}:{{ .Values.images.nats.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - name: client
+              containerPort: {{ .Values.nats.port }}
+              protocol: TCP
+            - name: routing
+              containerPort: {{ .Values.nats.routePort }}
+              protocol: TCP
+            - name: monitor
+              containerPort: {{ .Values.nats.monitorPort }}
+              protocol: TCP
+          {{- if .Values.nats.auth.enabled }}
+          env:
+            - name: NATS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.nats.auth.existingSecret }}
+                  key: {{ .Values.nats.auth.tokenKey }}
+          args:
+            - "--auth"
+            - "$(NATS_TOKEN)"
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: monitor
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /
+              port: monitor
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.nats.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
