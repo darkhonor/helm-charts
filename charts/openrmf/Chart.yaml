@@ -1,13 +1,10 @@
 apiVersion: v2
 name: openrmf
 description: >-
-  OpenRMF OSS - DoD Risk Management Framework compliance tool for managing
-  STIGs, Nessus scans, and NIST RMF compliance. Hardened for STIG'd RKE2
-  with Gateway API HTTPS and restricted Pod Security Standard.
+  OpenRMF OSS - DoD Risk Management Framework compliance tool for managing STIGs, Nessus scans, and NIST RMF compliance. Hardened for STIG'd RKE2 with Gateway API HTTPS and restricted Pod Security Standard.
 type: application
-version: 1.14.0
+version: 1.14.00
 appVersion: "1.14.00"
-
 keywords:
   - openrmf
   - rmf
@@ -15,17 +12,13 @@ keywords:
   - nist
   - compliance
   - dod
-
 sources:
   - https://github.com/Cingulara/openrmf-docs
-
 annotations:
   licenses: MIT
-
 maintainers:
   - name: darkhonor
     url: https://www.vmhomelab.org
-
 dependencies:
   - name: keycloakx
     repository: https://codecentric.github.io/helm-charts
