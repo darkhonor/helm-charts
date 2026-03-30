@@ -1,0 +1,149 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "openrmf.fullname" . }}
+  namespace: {{ include "openrmf.namespace" . }}
+  labels:
+    {{- include "openrmf.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "openrmf.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # ── Gateway Controller Access ──
+    # Allows Traefik to reach web frontend and API services.
+    # Default: Traefik in kube-system namespace (RKE2 default).
+    # Alternative: If Traefik is in a different namespace, update
+    # networkPolicy.gatewayNamespace and networkPolicy.gatewaySelector.
+    - from:
+        {{- if .Values.networkPolicy.gatewaySelector }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.gatewayNamespace }}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.gatewaySelector | nindent 14 }}
+        {{- else if .Values.networkPolicy.gatewayNamespace }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.gatewayNamespace }}
+        {{- else }}
+        - namespaceSelector: {}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.web.port }}
+        {{- range $name, $svc := .Values.api.services }}
+        - protocol: TCP
+          port: {{ $svc.port }}
+        {{- end }}
+
+    # ── Intra-namespace: Pods -> NATS ──
+    # API services and message consumers connect to NATS for pub/sub.
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "openrmf.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.nats.port }}
+
+    # ── Intra-namespace: Pods -> MongoDB ──
+    # Only relevant when mongodb.mode=operator (in-cluster MongoDB).
+    {{- if eq .Values.mongodb.mode "operator" }}
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "openrmf.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 27017
+    {{- end }}
+
+    # ── External Monitoring ──
+    # Pattern 1: Direct external scrape from centralized PromGraf.
+    #   Set networkPolicy.externalMonitoring.enabled=true and provide the
+    #   CIDR of your Prometheus instance (e.g., "10.0.50.0/24").
+    #
+    # Pattern 2: In-cluster Prometheus Agent with remote-write.
+    #   No ingress rule needed here -- the agent runs in-cluster and
+    #   uses ServiceMonitors. Only configure agent egress to PromGraf.
+    #
+    # Pattern 3: In-cluster Prometheus Operator (full stack).
+    #   Same as Pattern 2 -- ServiceMonitors handle discovery.
+    {{- if and .Values.networkPolicy.externalMonitoring.enabled .Values.networkPolicy.externalMonitoring.cidr }}
+    - from:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.externalMonitoring.cidr }}
+      ports:
+        {{- range $name, $svc := .Values.api.services }}
+        - protocol: TCP
+          port: {{ $svc.port }}
+        {{- end }}
+        - protocol: TCP
+          port: 7777
+    {{- end }}
+
+    # ── Additional Ingress Sources ──
+    {{- with .Values.networkPolicy.additionalIngressSources }}
+    - from:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+
+  egress:
+    # ── DNS (kube-system) ──
+    # All pods need DNS resolution via CoreDNS.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+
+    # ── Intra-namespace: All services ──
+    # Allow pods in this release to communicate with each other.
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "openrmf.selectorLabels" . | nindent 14 }}
+
+    # ── External Keycloak (JWT validation) ──
+    # API services validate JWT tokens against the external Keycloak.
+    # Only needed when keycloak.mode=external.
+    {{- if and (eq .Values.keycloak.mode "external") .Values.networkPolicy.allowExternalHTTPS }}
+    - to:
+        - namespaceSelector:
+            matchExpressions:
+              - key: "kubernetes.io/metadata.name"
+                operator: DoesNotExist
+      ports:
+        - protocol: TCP
+          port: 443
+    {{- end }}
+
+    # ── External MongoDB ──
+    # Only needed when mongodb.mode=external and MongoDB is outside the cluster.
+    {{- if eq .Values.mongodb.mode "external" }}
+    - to:
+        - namespaceSelector:
+            matchExpressions:
+              - key: "kubernetes.io/metadata.name"
+                operator: DoesNotExist
+      ports:
+        - protocol: TCP
+          port: 27017
+    {{- end }}
+
+    # ── Additional Egress Rules ──
+    {{- with .Values.networkPolicy.additionalEgressRules }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}
