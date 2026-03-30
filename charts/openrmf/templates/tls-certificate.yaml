@@ -1,0 +1,30 @@
+{{- if and .Values.httproute.enabled .Values.httproute.tls.enabled .Values.httproute.tls.certificate.generate }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "openrmf.fullname" . }}-tls
+  namespace: {{ include "openrmf.namespace" . }}
+  labels:
+    {{- include "openrmf.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "openrmf.fullname" . }}-tls
+  privateKey:
+    algorithm: {{ .Values.httproute.tls.certificate.algorithm }}
+    size: {{ .Values.httproute.tls.certificate.keySize }}
+  duration: {{ .Values.httproute.tls.certificate.duration | quote }}
+  renewBefore: {{ .Values.httproute.tls.certificate.renewBefore | quote }}
+  isCA: false
+  usages:
+    - server auth
+  {{- if .Values.httproute.tls.certificate.organization }}
+  subject:
+    organizations:
+      - {{ .Values.httproute.tls.certificate.organization | quote }}
+  {{- end }}
+  commonName: {{ .Values.httproute.hostname }}
+  dnsNames:
+    - {{ .Values.httproute.hostname }}
+  issuerRef:
+    name: {{ .Values.httproute.tls.issuer }}
+    kind: {{ .Values.httproute.tls.issuerKind }}
+{{- end }}

@@ -1,0 +1,49 @@
+{{- if .Values.httproute.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "openrmf.fullname" . }}
+  namespace: {{ include "openrmf.namespace" . }}
+  labels:
+    {{- include "openrmf.labels" . | nindent 4 }}
+    {{- with .Values.httproute.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.httproute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    - name: {{ include "openrmf.fullname" . }}-gateway
+      namespace: {{ include "openrmf.namespace" . }}
+      sectionName: https
+  hostnames:
+    - {{ .Values.httproute.hostname | quote }}
+  rules:
+    {{- range $name, $svc := .Values.api.services }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/{{ $name }}/
+      backendRefs:
+        - name: {{ include "openrmf.fullname" $ }}-api-{{ $name }}
+          port: {{ $svc.port }}
+    {{- end }}
+    {{- if eq .Values.keycloak.mode "internal" }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /auth/
+      backendRefs:
+        - name: {{ include "openrmf.fullname" . }}-keycloakx-http
+          port: 8080
+    {{- end }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "openrmf.fullname" . }}-web
+          port: {{ .Values.web.port }}
+{{- end }}

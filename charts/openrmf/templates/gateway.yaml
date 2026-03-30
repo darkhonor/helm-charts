@@ -1,0 +1,32 @@
+{{- if and .Values.httproute.enabled .Values.httproute.gateway.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "openrmf.fullname" . }}-gateway
+  namespace: {{ include "openrmf.namespace" . }}
+  labels:
+    {{- include "openrmf.labels" . | nindent 4 }}
+  {{- with .Values.httproute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.httproute.gateway.class }}
+  listeners:
+    - name: https
+      protocol: {{ .Values.httproute.gateway.listener.protocol }}
+      port: {{ .Values.httproute.gateway.listener.port }}
+      hostname: {{ .Values.httproute.hostname | quote }}
+      {{- if .Values.httproute.tls.enabled }}
+      tls:
+        mode: {{ .Values.httproute.tls.mode | quote }}
+        {{- if eq .Values.httproute.tls.mode "Terminate" }}
+        certificateRefs:
+          - name: {{ include "openrmf.fullname" . }}-tls
+            namespace: {{ include "openrmf.namespace" . }}
+        {{- end }}
+      {{- end }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+{{- end }}
