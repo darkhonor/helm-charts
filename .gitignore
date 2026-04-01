@@ -102,3 +102,5 @@ charts/**/charts/
 **/.mcp.json
 docs/
 
+# Helm Chart Lock files are a local consideration, not a repo concern
+**/Chart.lock

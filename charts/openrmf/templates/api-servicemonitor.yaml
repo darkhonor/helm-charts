@@ -1,0 +1,46 @@
+{{- if .Values.monitoring.serviceMonitor.enabled }}
+{{- range $name, $svc := .Values.api.services }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "openrmf.fullname" $ }}-api-{{ $name }}
+  namespace: {{ include "openrmf.namespace" $ }}
+  labels:
+    {{- include "openrmf.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: api-{{ $name }}
+    {{- with $.Values.monitoring.serviceMonitor.matchLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "openrmf.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: api-{{ $name }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ $.Values.monitoring.serviceMonitor.interval }}
+{{- end }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "openrmf.fullname" . }}-nats
+  namespace: {{ include "openrmf.namespace" . }}
+  labels:
+    {{- include "openrmf.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+    {{- with .Values.monitoring.serviceMonitor.matchLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "openrmf.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: nats
+  endpoints:
+    - port: monitor
+      path: /
+      interval: {{ .Values.monitoring.serviceMonitor.interval }}
+{{- end }}

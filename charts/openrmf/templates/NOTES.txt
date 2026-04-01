@@ -1,0 +1,33 @@
+=======================================================
+  OpenRMF OSS {{ .Chart.AppVersion }}
+  Chart Version: {{ .Chart.Version }}
+=======================================================
+
+{{- if .Values.httproute.enabled }}
+
+Access OpenRMF at:
+  https://{{ .Values.httproute.hostname }}
+
+{{- end }}
+
+Keycloak Mode: {{ .Values.keycloak.mode }}
+{{- if eq .Values.keycloak.mode "external" }}
+  URL: {{ .Values.keycloak.external.url }}
+  Realm: {{ .Values.keycloak.external.realm }}
+{{- else }}
+  Deployed as subchart (KeycloakX)
+{{- end }}
+
+MongoDB Mode: {{ .Values.mongodb.mode }}
+
+{{- if .Values.monitoring.serviceMonitor.enabled }}
+
+Monitoring: ServiceMonitors enabled (interval: {{ .Values.monitoring.serviceMonitor.interval }})
+{{- else }}
+
+Monitoring: ServiceMonitors disabled. Enable with:
+  --set monitoring.serviceMonitor.enabled=true
+{{- end }}
+
+Documentation:
+  https://cingulara.github.io/openrmf-docs/
