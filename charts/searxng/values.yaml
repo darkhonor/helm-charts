@@ -36,23 +36,21 @@ podAnnotations: {}
 podLabels: {}
 
 podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 977
-  runAsGroup: 977
   fsGroup: 977
   fsGroupChangePolicy: "OnRootMismatch"
-
-securityContext:
   runAsNonRoot: true
-  readOnlyRootFilesystem: true
-  allowPrivilegeEscalation: false
-  runAsUser: 977
-  runAsGroup: 977
   seccompProfile:
     type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
   capabilities:
     drop:
-    - ALL
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
