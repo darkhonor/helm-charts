@@ -1,6 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
+  "labels": ["dependencies", "renovate"],
+  "pinDigests": true,
+  "schedule": ["before 6am on Monday"],
+  "docker": {
+    "pinDigests": true,
+    "stabilityDays": 7
+  },
+  "github-actions": {
+    "pinDigests": true,
+    "stabilityDays": 3
+  },
   "packageRules": [
     {
       "description": "Automerge minor/patch Helm dependency updates",
