@@ -39,6 +39,8 @@ podSecurityContext:
   fsGroup: 977
   fsGroupChangePolicy: "OnRootMismatch"
   runAsNonRoot: true
+  runAsUser: 977
+  runAsGroup: 977
   seccompProfile:
     type: RuntimeDefault
 
@@ -46,6 +48,8 @@ securityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
   runAsNonRoot: true
+  runAsUser: 977
+  runAsGroup: 977
   capabilities:
     drop:
       - ALL
