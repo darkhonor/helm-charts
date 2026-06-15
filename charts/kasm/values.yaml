@@ -294,7 +294,7 @@ components:
     #
     image:
       repository: kasmweb/api
-      tag: 1.18.1
+      tag: 1.19.0
     # components.api.annotations -- Custom annotations to add to the Kasm api Deployment
     annotations: {}
     # components.api.resources -- Manually configure the Kasm api Deployment resources. This overrides the pre-defined `deploymentSize` values.
