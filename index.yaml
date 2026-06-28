@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   code-server:
   - apiVersion: v2
+    appVersion: 4.126.0
+    created: "2026-06-28T09:42:33.188819854Z"
+    description: A Helm chart for coder/code-server
+    digest: 44870a4441406ccf9f4c58540a8ef8dd15534ba9c0bddc47d8d4a7630db69cd2
+    name: code-server
+    type: application
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/code-server-4.126.0/code-server-4.126.0.tgz
+    version: 4.126.0
+  - apiVersion: v2
     appVersion: 4.123.0
     created: "2026-06-12T03:00:11.437537664Z"
     description: A Helm chart for coder/code-server
@@ -2009,4 +2019,4 @@ entries:
     urls:
     - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
     version: 2025.9.29-77fd3ee53
-generated: "2026-06-18T09:25:44.571262027Z"
+generated: "2026-06-28T09:42:33.831793135Z"
