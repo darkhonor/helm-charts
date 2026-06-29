@@ -324,7 +324,7 @@ components:
     #
     image:
       repository: kasmweb/kasm-guac
-      tag: 1.18.1
+      tag: 1.19.0
     # components.guac.enabled -- Use this setting to enable/disable deployment of the Kasm Guacamole web RDP service - 
     # [Kasm Guac Service](https://docs.kasm.com/docs/guide/connection_proxies#guacamole-guac).
     #
