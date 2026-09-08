@@ -309,7 +309,7 @@ components:
     #
     image:
       repository: kasmweb/manager
-      tag: 1.18.1
+      tag: 1.19.0
     # components.manager.annotations -- Custom annotations to add to the Kasm Manager Deployment
     annotations: {}
     # components.manager.resources -- Manually configure the Kasm Manager Deployment resources. This overrides the pre-defined `deploymentSize` values.
