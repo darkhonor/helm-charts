@@ -264,6 +264,22 @@ entries:
     version: 1.18.1
   local-path-provisioner:
   - apiVersion: v1
+    appVersion: v0.0.37
+    created: "2026-09-08T12:32:21.551206041Z"
+    description: Use HostPath for persistent local storage with Kubernetes
+    digest: d58f15da91d43955730e41da60d9d6e9b78d2d9bdf53c62cdf2e1e10a7d44d68
+    home: https://github.com/rancher/local-path-provisioner
+    keywords:
+    - storage
+    - hostpath
+    kubeVersion: '>=1.12.0-r0'
+    name: local-path-provisioner
+    sources:
+    - https://github.com/rancher/local-path-provisioner.git
+    urls:
+    - https://github.com/darkhonor/helm-charts/releases/download/local-path-provisioner-v0.0.37/local-path-provisioner-v0.0.37.tgz
+    version: v0.0.37
+  - apiVersion: v1
     appVersion: v0.0.36
     created: "2026-05-12T05:26:53.903682004Z"
     description: Use HostPath for persistent local storage with Kubernetes
@@ -2059,4 +2075,4 @@ entries:
     urls:
     - https://github.com/darkhonor/helm-charts/releases/download/searxng-2025.9.29-77fd3ee53/searxng-2025.9.29-77fd3ee53.tgz
     version: 2025.9.29-77fd3ee53
-generated: "2026-06-28T09:47:55.176329698Z"
+generated: "2026-09-08T12:32:21.551398942Z"
