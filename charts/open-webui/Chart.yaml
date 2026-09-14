@@ -21,7 +21,7 @@ annotations:
 dependencies:
   - name: ollama
     repository: https://helm.otwld.com/
-    version: 1.79.0
+    version: 1.81.0
     import-values:
       - child: service
         parent: ollama.service
