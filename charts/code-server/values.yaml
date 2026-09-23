@@ -13,7 +13,7 @@ image:
 # NIST 800-53: CM-6, SI-2 — pin all images to immutable tags
 initContainer:
   image: busybox
-  tag: '1.37.0'
+  tag: '1.38.0'
   pullPolicy: IfNotPresent
 
 # Specifies one or more secrets to be used when pulling images from a
